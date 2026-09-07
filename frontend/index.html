@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>V-CAD | 3D ULPIN Property Portal</title>
 <style>
-:root{--saffron:#e77817;--green:#138808;--navy:#18324b;--ink:#25313b;--muted:#66727c;--line:#d9dee3;--bg:#f5f7f8;--white:#fff;--danger:#b42318;--gold:#f4b942}
+:root{--saffron:#e77817;--green:#138808;--navy:#18324b;--ink:#25313b;--muted:#66727c;--line:#d9dee3;--bg:#f5f7f8;--white:#fff;--danger:#b42318;--gold:#f4b942;--private:#6ea8ff;--common:#69d39b;--selected:#ffd166}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg)}
 body:before{content:"";display:block;height:4px;background:linear-gradient(90deg,var(--saffron) 0 33%,#fff 33% 66%,var(--green) 66%)}
 .header{background:#fff;border-bottom:1px solid var(--line)}.top{max-width:1240px;margin:auto;padding:14px 22px;display:flex;align-items:center;gap:16px}
@@ -24,25 +24,39 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 .kv{display:grid;grid-template-columns:180px 1fr;border-top:1px solid var(--line)}.kv div{padding:10px;border-bottom:1px solid var(--line)}.kv div:nth-child(odd){font-weight:700;background:#fafbfc}
 .login{max-width:470px;margin:45px auto}.login .hero{text-align:center;border-left:0;border-top:5px solid var(--saffron)}
 .asset{min-height:210px;border:1px dashed #bcc5cc;background:#f8fafb;display:grid;place-items:center;color:var(--muted);text-align:center;padding:20px}.asset .icon{font-size:42px;color:var(--navy)}
-.map{height:270px;background:linear-gradient(135deg,#e9f1e7,#f6f4e8);border:1px solid var(--line);position:relative;overflow:hidden}.map:after{content:"";position:absolute;left:45%;top:20%;width:160px;height:160px;border:3px solid var(--green);transform:rotate(18deg);background:rgba(19,136,8,.08)}.pin{position:absolute;left:55%;top:45%;font-size:28px}
+.map-container{height:420px;background:#0c1322;border:1px solid var(--line);position:relative;overflow:hidden;border-radius:4px}
+.map-container canvas{display:block;width:100%;height:100%;touch-action:none}
+.hud{position:absolute;left:14px;top:14px;background:rgba(12,17,30,.88);border:1px solid var(--line);padding:8px 12px;border-radius:6px;z-index:3;color:#fff;font-size:11px}
+.hud strong{display:block;color:var(--selected)}
+.viewbar{position:absolute;right:14px;top:14px;display:flex;gap:5px;z-index:3}
+.viewbar button{border:1px solid var(--line);background:rgba(12,17,30,.9);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px}
+.viewbar button.active{border-color:var(--selected);color:var(--selected)}
+.floorbar{position:absolute;right:14px;top:52px;display:flex;gap:4px;z-index:3}
+.floorbar button{border:1px solid var(--line);background:rgba(12,17,30,.88);color:var(--muted);padding:5px 8px;border-radius:5px;cursor:pointer;font-weight:600;font-size:10px}
+.floorbar button.active{border-color:#8fa3c8;color:#fff;background:#202c45}
+.focus{position:absolute;left:14px;bottom:14px;background:rgba(12,17,30,.88);border:1px solid var(--line);padding:7px 10px;border-radius:6px;font-size:11px;color:var(--muted);z-index:3}
 .footer{margin-top:35px;background:var(--navy);color:#fff;padding:24px}.footerin{max-width:1240px;margin:auto;padding:0 22px;font-size:12px;line-height:1.6}
 .modal{position:fixed;inset:0;background:rgba(10,25,38,.52);display:grid;place-items:center;z-index:20}.modalbox{width:min(440px,92vw);background:#fff;border-top:5px solid var(--saffron);padding:22px;box-shadow:0 10px 35px #0003}.warnicon{font-size:38px;color:#b77900}.modal h3{margin:8px 0;color:var(--navy)}
+.results{max-height:160px;overflow:auto;margin-top:8px}
+.result{padding:7px;border-bottom:1px solid var(--line);cursor:pointer;font-size:11px}
+.result:hover{background:#f0f4f8}
 @media(max-width:800px){.half,.third{grid-column:span 12}.row{grid-template-columns:1fr}.tools{display:none}.top{padding:12px}.navin{overflow:auto}.nav button{white-space:nowrap}.kv{grid-template-columns:1fr}}
 </style>
 <script src="config.js"></script></head>
 <body>
 <header class="header"><div class="top">
 <div class="emblem">भारत<br>INDIA</div><div class="brand"><h1>V-CAD — 3D ULPIN Property Portal</h1><p>Digital Land Records • Vertical Property Mapping & Verification</p></div>
-<div class="tools"><span id="roleBadge" class="status">Not signed in</span><select id="lang" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="as">অসমীয়া</option><option value="bn">বাংলা</option><option value="brx">बड़ो</option><option value="doi">डोगरी</option><option value="gu">ગુજરાતી</option><option value="kn">ಕನ್ನಡ</option><option value="ks">कॉशुर</option><option value="kok">कोंकणी</option><option value="mai">मैथिली</option><option value="ml">മലയാളം</option><option value="mni">মৈতৈলোন্</option><option value="mr">मराठी</option><option value="ne">नेपाली</option><option value="or">ଓଡ଼ିଆ</option><option value="pa">ਪੰਜਾਬੀ</option><option value="sa">संस्कृतम्</option><option value="sat">ᱥᱟᱱᱛᱟᱲᱤ</option><option value="sd">سنڌي</option><option value="ta">தமிழ்</option><option value="te">తెలుగు</option><option value="ur">اردو</option></select></div>
+<div class="tools"><span id="roleBadge" class="status">Not signed in</span><select id="lang" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="te">తెలుగు</option></select></div>
 </div></header>
 <nav class="nav"><div class="navin"><button data-page="home" class="active">Home</button><button data-page="lookup">Property Search</button><button data-page="admin">Administration</button><button data-page="about">About 3D ULPIN</button><button id="logout" class="hidden" style="margin-left:auto">Sign out</button></div></nav>
 
 <main class="wrap">
 <section id="home" class="page">
 <div class="crumb">Home</div><div class="hero"><h2>3D Property Identity & Verification</h2><p>A government-style interface for viewing and administering vertical, underground and elevated property records linked to a parent ULPIN.</p></div>
-<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Citizen / User Services</h3><p>Search an authorised property using its 3D ULPIN and inspect identity, location, elevation and available spatial documents.</p><div class="actions"><button class="btn primary" onclick="show('lookup')">Search Property</button></div></div>
+<div class="grid">
+<div class="card half"><div class="sectionline"></div><h3>Citizen / User Services</h3><p>Search an authorised property using its 3D ULPIN and inspect identity, location, elevation and available spatial documents.</p><div class="actions"><button class="btn primary" onclick="show('lookup')">Search Property</button></div></div>
 <div class="card half"><div class="sectionline"></div><h3>Administration</h3><p>Authorised administrators can register new cadastral objects and update existing records through the protected backend.</p><div class="actions"><button class="btn secondary" onclick="show('login');setRole('admin')">Administrator Login</button></div></div>
-<div class="card"><div class="sectionline"></div><div class="notice">The 3D identifier is an extension linked to the parent parcel identity. Geometry, rights, provenance and validation are maintained as separate records.</div></div></div>
+</div>
 </section>
 
 <section id="login" class="page hidden login"><div class="hero"><h2>Secure Portal Login</h2><p id="loginSub">Sign in to access authorised services.</p></div><div class="card">
@@ -50,170 +64,260 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 <label>User ID</label><input id="uid" autocomplete="username" placeholder="Enter user ID">
 <label>Password</label><input id="pwd" type="password" autocomplete="current-password" placeholder="Enter password">
 <div class="actions"><button class="btn primary" onclick="login()">Sign in</button><button class="btn outline" onclick="show('home')">Cancel</button></div>
-<div class="notice warning" style="margin-top:16px">Authentication is enforced by the connected backend. This screen never stores database credentials.</div>
 </div></section>
 
-<section id="lookup" class="page hidden"><div class="crumb">Home / Property Search</div><div class="hero"><h2>Search 3D Property Record</h2><p>Enter the 3D ULPIN supplied by the land-record authority.</p></div>
-<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 12345678912345-F01-V-PRV-012-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
-<div class="card half"><div class="sectionline"></div><h3>Access Notice</h3><p style="color:var(--muted);line-height:1.6">Only property information authorised for the signed-in account is returned. Restricted utility and ownership information remains access-controlled.</p></div></div>
-<div id="result" class="grid hidden"></div></section>
+<section id="lookup" class="page hidden"><div class="crumb">Home / Property Search</div><div class="hero"><h2>Search 3D Property Record</h2><p>Explore multi-level structure models and spatial relationships linked to parent ULPIN `12345678901234`.</p></div>
+<div class="grid">
+<div class="card half">
+<div class="sectionline"></div>
+<h3>Interactive 3D Visualizer & Query</h3>
+<label>Search Unit, ULPIN, or Owner</label>
+<input id="search" placeholder="e.g. Flat 101, 12345678901234-F01-V-PRV-A101-V01, Owner A" autocomplete="off">
+<div id="results" class="results"></div>
+<div id="details" class="card" style="margin-top:12px"><div class="label">Selected object</div><div class="value">Click a 3D object or search above.</div></div>
+<div id="related" class="card" style="display:none; margin-top:12px"></div>
+</div>
+<div class="card half">
+<div class="sectionline"></div>
+<h3>3D Spatial Building Model</h3>
+<div class="map-container">
+<div class="hud"><strong>Building scope: 12345678901234</strong><span style="font-size:9px;color:#9eabc4">Amaravathi, AP Cadastre</span></div>
+<div class="viewbar"><button id="view3d" class="active">3D</button><button id="viewTop">TOP</button><button id="resetBtn">RESET</button><button id="spinBtn">↻ 360°</button></div>
+<div class="floorbar"><button data-floor="all" class="active">ALL</button><button data-floor="g0">GROUND</button><button data-floor="f1">F1</button><button data-floor="f2">F2</button><button data-floor="b1">BASEMENT</button></div>
+<div id="focusHud" class="focus">Visual focus: Flat 101 inside Block A</div>
+<canvas id="view"></canvas>
+</div>
+</div>
+</div>
+</section>
 
 <section id="admin" class="page hidden"><div class="crumb">Home / Administration</div><div class="hero"><h2>Property Record Administration</h2><p>Create or update spatial property records. Final authorisation and database writes are performed by the backend.</p></div>
 <div id="adminGate" class="card"><div class="notice warning">Administrator authentication is required before editing records.</div><div class="actions"><button class="btn secondary" onclick="show('login');setRole('admin')">Administrator Login</button></div></div>
 <div id="adminPanel" class="grid hidden"><div class="card"><div class="sectionline"></div><h3>Register / Update Property</h3>
 <div class="row"><div><label>Operation</label><select id="op" onchange="toggleUpdate()"><option value="create">Create new record</option><option value="update">Update existing record</option></select></div><div id="updateIdWrap" class="hidden"><label>Existing 3D ULPIN to update</label><input id="updateId" placeholder="Paste existing generated 3D ULPIN"></div></div>
-<div class="row"><div><label>Parent 2D ULPIN</label><input id="parent" maxlength="14" placeholder="14-character parent ULPIN"></div><div><label>Rights / Use Code</label><select id="rights"><option value="PRV">PRV — Private</option><option value="COM">COM — Common</option><option value="UTL">UTL — Utility</option><option value="CML">CML — Commercial</option></select></div></div>
-<div class="row"><div><label>Unit ID</label><input id="unit" placeholder="A301 / PRK01 / H001"></div><div><label>Property / Unit Name</label><input id="pname" placeholder="Apartment / Shop / Office"></div><div><label>Space Class</label><select id="space"><option>Vertical / Building</option><option>Common / Shared</option><option>Underground</option><option>Elevated / Air-right</option></select></div></div>
-<div class="row"><div><label>Floor / Z-level</label><input id="floor" placeholder="F03 / B01 / G00 / R00"></div><div><label>Area (m²)</label><input id="area" type="number" step="0.1" placeholder="112.6"></div></div>
-<label>Location / Address</label><textarea id="addr" placeholder="Municipality, district, state"></textarea>
+<div class="row"><div><label>Parent 2D ULPIN</label><input id="parent" maxlength="14" placeholder="12345678901234"></div><div><label>Rights / Use Code</label><select id="rights"><option value="PRV">PRV — Private</option><option value="COM">COM — Common</option><option value="UTL">UTL — Utility</option><option value="CML">CML — Commercial</option></select></div></div>
+<div class="row"><div><label>Unit ID</label><input id="unit" placeholder="A301"></div><div><label>Property / Unit Name</label><input id="pname" placeholder="Apartment / Shop / Office"></div><div><label>Space Class</label><select id="space"><option>Vertical / Building</option><option>Common / Shared</option><option>Underground</option><option>Elevated / Air-right</option></select></div></div>
+<div class="row"><div><label>Floor / Z-level</label><input id="floor" placeholder="F03"></div><div><label>Area (m²)</label><input id="area" type="number" step="0.1" placeholder="112.6"></div></div>
+<label>Location / Address</label><textarea id="addr" placeholder="Amaravathi, Andhra Pradesh"></textarea>
 <label>Blueprint / source document</label><input id="blueprint" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.dwg,.dxf">
 <div id="generated" class="notice" style="margin-top:16px"><strong>Generated 3D ULPIN:</strong> <span id="generatedId">Will be generated after submission</span></div><div class="actions"><button class="btn success" onclick="saveProperty()">Save / Submit</button><button class="btn outline" onclick="resetAdmin()">Reset</button></div></div>
-<div class="card"><div class="sectionline"></div><h3>Record Governance</h3><div class="kv"><div>Geometry</div><div>3D solid / surface + elevation range</div><div>Rights</div><div>Linked separately to the spatial object</div><div>Validation</div><div>Topology and geometry status</div><div>Version</div><div>Incremented by the backend on approved change</div></div></div></div>
+</div></div>
 </section>
 
-<section id="about" class="page hidden"><div class="crumb">Home / About</div><div class="hero"><h2>About the 3D ULPIN Extension</h2><p>The prototype retains the parent ULPIN as the base parcel identity and represents vertical, underground, elevated and air-right spaces as distinct 3D cadastral objects.</p></div>
-<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Illustrative 3D Identifier</h3><p><strong>12345678912345-F01-V-PRV-012-V01</strong></p><p style="color:var(--muted)">Parent ULPIN • Z-Level • Space Class • Rights/Use • Unit • Version</p></div><div class="card half"><div class="sectionline"></div><h3>Interoperability</h3><p>Designed for API-based integration and geospatial exchange including GeoJSON, CityGML/3D city models, IFC/BIM, LAS/LAZ and 3D Tiles.</p></div></div></section>
+<section id="about" class="page hidden"><div class="crumb">Home / About</div><div class="hero"><h2>About the 3D ULPIN Extension</h2><p>The prototype retains the parent ULPIN as the base parcel identity and represents vertical, underground, elevated and air-right spaces as distinct 3D cadastral objects[cite: 3].</p></div>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Illustrative 3D Identifier</h3><p><strong>12345678901234-F01-V-PRV-A101-V01</strong></p><p style="color:var(--muted)">Parent ULPIN • Z-Level • Space Class • Rights/Use • Unit • Version[cite: 3]</p></div><div class="card half"><div class="sectionline"></div><h3>Interoperability</h3><p>Designed for API-based integration and geospatial exchange including GeoJSON, CityGML/3D city models, IFC/BIM, and LAS/LAZ point clouds[cite: 3].</p></div></div></section>
 </main>
-<footer class="footer"><div class="footerin"><strong>V-CAD — 3D ULPIN Generation & Vertical Property Mapping</strong><br>Smart India Hackathon prototype • Spatial records are subject to authorised verification and publication.</div></footer>
+
+<footer class="footer"><div class="footerin"><strong>V-CAD — 3D ULPIN Generation & Vertical Property Mapping</strong><br>Smart India Hackathon prototype • Spatial records are subject to authorised verification and publication[cite: 3].</div></footer>
 <div id="modal" class="modal hidden"><div class="modalbox"><div class="warnicon">⚠</div><h3 id="modalTitle">Warning</h3><p id="modalText"></p><div class="actions"><button class="btn primary" onclick="closeModal()">OK</button></div></div></div>
+
 <script>
 window.APP_CONFIG={API_BASE:"http://localhost:8000/api"};
-let mode="standalone",role=null,token=null;
+let role=null,token=null;
 
-const registry={
-"12345678912345-F01-V-PRV-012-V01":{threeDULPIN:"12345678912345-F01-V-PRV-012-V01",parentULPIN:"12345678912345",name:"Unit 012",space:"Vertical / Building",floor:"F01",area:"120.5",address:"Amaravathi, Andhra Pradesh",lat:16.5062,lon:80.5214,status:"Approved / Published",validation:"PASS — Geometry Valid",rights:"Private",version:"V01"}
-};
+// Integrated Friend's 3D Dataset
+const DATA={"prototype":true,"source":"fictional SIH demo dataset derived from supplied 3D ULPIN generator","parent_2d_ulpin":"12345678901234","objects":[{"id":"building_a","name":"Block A","type":"BUILDING","floor":"G00","space_class":"V","rights":"COM","unit_id":"BLKA","ulpin_3d":"12345678901234-G00-V-COM-BLKA-V01","owner":"Community","description":"Main apartment building","parent_2d_ulpin":"12345678901234"},{"id":"flat_101","name":"Flat 101","type":"FLAT","floor":"F01","space_class":"V","rights":"PRV","unit_id":"A101","ulpin_3d":"12345678901234-F01-V-PRV-A101-V01","owner":"Owner A","description":"Private residential unit","parent_2d_ulpin":"12345678901234"},{"id":"flat_102","name":"Flat 102","type":"FLAT","floor":"F01","space_class":"V","rights":"PRV","unit_id":"A102","ulpin_3d":"12345678901234-F01-V-PRV-A102-V01","owner":"Owner B","description":"Private residential unit","parent_2d_ulpin":"12345678901234"},{"id":"flat_201","name":"Flat 201","type":"FLAT","floor":"F02","space_class":"V","rights":"PRV","unit_id":"A201","ulpin_3d":"12345678901234-F02-V-PRV-A201-V01","owner":"Owner A","description":"Private residential unit","parent_2d_ulpin":"12345678901234"},{"id":"flat_202","name":"Flat 202","type":"FLAT","floor":"F02","space_class":"V","rights":"PRV","unit_id":"A202","ulpin_3d":"12345678901234-F02-V-PRV-A202-V01","owner":"Owner C","description":"Private residential unit","parent_2d_ulpin":"12345678901234"},{"id":"parking_p01","name":"Parking P01","type":"PARKING","floor":"G00","space_class":"S","rights":"PRV","unit_id":"PRK01","ulpin_3d":"12345678901234-G00-S-PRV-PRK01-V01","owner":"Owner A","description":"Assigned parking for Owner A","parent_2d_ulpin":"12345678901234"},{"id":"parking_p02","name":"Parking P02","type":"PARKING","floor":"G00","space_class":"S","rights":"PRV","unit_id":"PRK02","ulpin_3d":"12345678901234-G00-S-PRV-PRK02-V01","owner":"Owner B","description":"Assigned parking for Owner B","parent_2d_ulpin":"12345678901234"},{"id":"plot_17","name":"Associated Plot 17","type":"PLOT","floor":"G00","space_class":"S","rights":"PRV","unit_id":"P17","ulpin_3d":"12345678901234-G00-S-PRV-P17-V01","owner":"Owner A","description":"Parent/associated plot","parent_2d_ulpin":"12345678901234"},{"id":"stairs_s1","name":"Staircase S1","type":"STAIR","floor":"F00-F02","space_class":"V","rights":"COM","unit_id":"STAIR1","ulpin_3d":"12345678901234-F00-V-COM-STAIR1-V01","owner":"Community","description":"Common staircase","parent_2d_ulpin":"12345678901234"},{"id":"fire_f1","name":"Fire Exit F1","type":"FIRE_EXIT","floor":"F00-F02","space_class":"V","rights":"COM","unit_id":"FIRE01","ulpin_3d":"12345678901234-F00-V-COM-FIRE01-V01","owner":"Community","description":"Common emergency exit","parent_2d_ulpin":"12345678901234"},{"id":"park_1","name":"Community Park","type":"PARK","floor":"G00","space_class":"S","rights":"COM","unit_id":"PARK01","ulpin_3d":"12345678901234-G00-S-COM-PARK01-V01","owner":"Community","description":"Common green area","parent_2d_ulpin":"12345678901234"},{"id":"lawn_1","name":"Community Lawn","type":"LAWN","floor":"G00","space_class":"S","rights":"COM","unit_id":"LAWN01","ulpin_3d":"12345678901234-G00-S-COM-LAWN01-V01","owner":"Community","description":"Common lawn","parent_2d_ulpin":"12345678901234"},{"id":"cellar_1","name":"Cellar C1","type":"CELLAR","floor":"B01","space_class":"U","rights":"COM","unit_id":"CELLAR1","ulpin_3d":"12345678901234-B01-U-COM-CELLAR1-V01","owner":"Community","description":"Common underground cellar","parent_2d_ulpin":"12345678901234"},{"id":"terrace_1","name":"Terrace T1","type":"TERRACE","floor":"R00","space_class":"E","rights":"COM","unit_id":"TERR01","ulpin_3d":"12345678901234-R00-E-COM-TERR01-V01","owner":"Community","description":"Common roof terrace","parent_2d_ulpin":"12345678901234"},{"id":"building_b","name":"Neighbor Block B","type":"BUILDING","floor":"G00","space_class":"V","rights":"COM","unit_id":"BLKB","ulpin_3d":"98765432109876-G00-V-COM-BLKB-V01","owner":"Community","description":"Neighbor building used only to verify scope filtering","parent_2d_ulpin":"98765432109876"},{"id":"flat_b101","name":"Neighbor Flat B101","type":"FLAT","floor":"F01","space_class":"V","rights":"PRV","unit_id":"B101","ulpin_3d":"98765432109876-F01-V-PRV-B101-V01","owner":"Neighbor Owner","description":"Neighbor object must never appear in Block A scope","parent_2d_ulpin":"98765432109876"}],"relationships":[{"source_id":"flat_101","target_id":"parking_p01","type":"OWNER_ASSOCIATED"},{"source_id":"flat_101","target_id":"plot_17","type":"OWNER_ASSOCIATED"},{"source_id":"flat_101","target_id":"building_a","type":"LOCATED_IN"},{"source_id":"flat_102","target_id":"parking_p02","type":"OWNER_ASSOCIATED"},{"source_id":"flat_102","target_id":"building_a","type":"LOCATED_IN"},{"source_id":"flat_201","target_id":"parking_p01","type":"OWNER_ASSOCIATED"},{"source_id":"flat_201","target_id":"plot_17","type":"OWNER_ASSOCIATED"},{"source_id":"flat_201","target_id":"building_a","type":"LOCATED_IN"},{"source_id":"flat_202","target_id":"building_a","type":"LOCATED_IN"},{"source_id":"flat_101","target_id":"stairs_s1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_101","target_id":"fire_f1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_101","target_id":"park_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_101","target_id":"lawn_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_101","target_id":"cellar_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_101","target_id":"terrace_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_102","target_id":"stairs_s1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_102","target_id":"fire_f1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_102","target_id":"park_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_102","target_id":"lawn_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_102","target_id":"cellar_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_102","target_id":"terrace_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_201","target_id":"stairs_s1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_201","target_id":"fire_f1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_201","target_id":"park_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_201","target_id":"lawn_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_201","target_id":"cellar_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_201","target_id":"terrace_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_202","target_id":"stairs_s1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_202","target_id":"fire_f1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_202","target_id":"park_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_202","target_id":"lawn_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_202","target_id":"cellar_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_202","target_id":"terrace_1","type":"COMMON_FACILITY_ACCESS"},{"source_id":"flat_b101","target_id":"building_b","type":"LOCATED_IN"}]};
 
-function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==="admin")refreshAdmin()}
+function show(id){
+  document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));
+  if(id==="admin") refreshAdmin();
+  if(id==="lookup") setTimeout(resizeCanvas, 50);
+}
 function setRole(r){document.getElementById('loginRole').value=r}
 function warn(t,m){document.getElementById('modalTitle').textContent=t;document.getElementById('modalText').textContent=m;document.getElementById('modal').classList.remove('hidden')}
 function closeModal(){document.getElementById('modal').classList.add('hidden')}
-
 function login(){
  const r=document.getElementById('loginRole').value, u=document.getElementById('uid').value.trim(),p=document.getElementById('pwd').value;
  if(!u||!p)return warn("Sign-in required","Please enter your User ID and password.");
- if(true){role=r;token="secure-session-token";sessionStorage.setItem("ulpin_role",role);updateRole();show(r==="admin"?"admin":"lookup")}
+ role=r;token="demo-token";sessionStorage.setItem("ulpin_role",role);updateRole();show(r==="admin"?"admin":"lookup")
 }
-
 function updateRole(){document.getElementById('roleBadge').textContent=role==="admin"?"Administrator":"User";document.getElementById('logout').classList.remove('hidden')}
 function logout(){role=null;token=null;sessionStorage.clear();document.getElementById('roleBadge').textContent="Not signed in";document.getElementById('logout').classList.add('hidden');show('home')}
 function getVal(id){return document.getElementById(id)?.value?.trim()||""}
 
-function make3DULPIN(){
- const parent=getVal('parent'), z=getVal('floor'), spaceCode=({"Vertical / Building":"V","Common / Shared":"S","Underground":"U","Elevated / Air-right":"E"})[getVal('space')]||'V';
- const rights=getVal('rights')||'PRV', unit=getVal('unit')||'UNIT', version='V01';
- if(!/^\d{14}$/.test(parent)) throw Error('Parent 2D ULPIN must contain exactly 14 digits.');
- if(!/^(F\d{2}|B\d{2}|G\d{2}|R\d{2})$/i.test(z)) throw Error('Floor / Z-level must look like F03, B01, G00 or R00.');
- if(!/^[A-Za-z0-9_-]{1,16}$/.test(unit)) throw Error('Unit ID may contain letters, numbers, _ or - only.');
- return `${parent}-${z.toUpperCase()}-${spaceCode}-${rights}-${unit.toUpperCase()}-${version}`;
+// 3D Canvas Rendering Engine integration from friend's app.js
+const canvas=document.getElementById('view'),ctx=canvas?canvas.getContext('2d'):null;
+const search=document.getElementById('search'),results=document.getElementById('results'),details=document.getElementById('details'),related=document.getElementById('related');
+let selected=null, yaw=-.45, pitch=.20, zoom=.72, dragging=false,lastX=0,lastY=0,viewMode='3d',floorMode='all',cameraTarget={x:0,y:2.9,z:0},anim=null,autoSpin=false,spinRaf=null;
+const byId=Object.fromEntries(DATA.objects.map(o=>[o.id,o]));
+let activeParent=DATA.parent_2d_ulpin,visibleObjects=DATA.objects.filter(o=>o.parent_2d_ulpin===activeParent);
+
+const centers={
+flat_101:[-1.55,1.45,0],flat_102:[1.55,1.45,0],flat_201:[-1.55,4.15,0],flat_202:[1.55,4.15,0],
+parking_p01:[-2.7,.18,2.5],parking_p02:[2.7,.18,2.5],plot_17:[-2.1,.12,3.45],stairs_s1:[0,3.0,2.1],
+fire_f1:[0,3.2,1.92],park_1:[-4,.12,-.7],lawn_1:[3.8,.12,-.7],terrace_1:[0,6.05,0],cellar_1:[0,-.55,0],
+building_a:[0,3.0,0],building_b:[0,2.4,0],flat_b101:[0,1.85,0]};
+
+const flatDefs=[
+ [byId.flat_101,-1.55,1.45,0,2.55,2.35,1.45],
+ [byId.flat_102,1.55,1.45,0,2.55,2.35,1.45],
+ [byId.flat_201,-1.55,4.15,0,2.55,2.35,1.45],
+ [byId.flat_202,1.55,4.15,0,2.55,2.35,1.45]
+];
+const simpleDefs=[
+ ['parking_p01',-2.7,.02,2.5,1.25,.45,1,'#314c73'],['parking_p02',2.7,.02,2.5,1.25,.45,1,'#314c73'],
+ ['plot_17',-2.1,.02,3.45,2.1,.18,.75,'#314c73'],['stairs_s1',0,.02,2.1,.75,6.0,.55,'#49655d'],
+ ['fire_f1',0,2.4,1.92,.35,1.4,.25,'#49655d'],['park_1',-4,.02,-.7,1.5,.12,1.8,'#49655d'],
+ ['lawn_1',3.8,.02,-.7,1.5,.12,1.8,'#49655d'],['terrace_1',0,6.42,0,5.4,.12,2.8,'#49655d'],
+ ['cellar_1',0,-.65,0,5.2,.25,2.5,'#49655d']
+];
+
+function floorAllowed(o){
+ if(floorMode==='all') return true;
+ if(floorMode==='f1') return o.floor==='F01'||o.id==='building_a'||o.id==='stairs_s1'||o.id==='fire_f1'||o.id==='terrace_1';
+ if(floorMode==='f2') return o.floor==='F02'||o.id==='building_a'||o.id==='stairs_s1'||o.id==='fire_f1'||o.id==='terrace_1';
+ if(floorMode==='g0') return o.floor==='G00'||o.id==='building_a';
+ if(floorMode==='b1') return o.floor==='B01'||o.id==='building_a';
+ return true;
+}
+function relatedTo(id){
+ const r=[]; DATA.relationships.forEach(x=>{const a=byId[x.source_id],b=byId[x.target_id];if(!a||!b)return;if(x.source_id===id)r.push({o:b,t:x.type});if(x.target_id===id)r.push({o:a,t:x.type});});return r.filter(x=>x.o.parent_2d_ulpin===activeParent);
+}
+function select(o){if(!o||o.parent_2d_ulpin!==activeParent)return;selected=o;renderDetails();draw()}
+function renderDetails(){
+ if(!details) return;
+ if(!selected){details.innerHTML='<div class="label">Selected object</div><div class="value">Click a 3D object or search above.</div>';related.style.display='none';return}
+ details.innerHTML=`<div class="label">${selected.type}</div><div class="value"><strong>${selected.name}</strong></div>
+ <div class="value"><span class="label">Parent 2D ULPIN</span><br>${selected.parent_2d_ulpin}</div>
+ <div class="value"><span class="label">3D ULPIN</span><br>${selected.ulpin_3d}</div>
+ <div class="value"><span class="label">Owner / rights</span><br>${selected.owner} • ${selected.rights}</div>`;
+ const rr=relatedTo(selected.id);related.style.display=rr.length?'block':'none';
+ related.innerHTML='<div class="label">Related spatial objects</div>'+rr.map(x=>`<div class="result" data-id="${x.o.id}"><strong>${x.o.name}</strong><br><span class="${x.o.rights==='PRV'?'private':'common'}">${x.t}</span></div>`).join('');
+ related.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>select(byId[el.dataset.id]));
+}
+function focusPointFor(o){const c=centers[o.id];return c?{x:c[0],y:c[1],z:c[2]}:{x:0,y:3,z:0}}
+function animateFocus(o,mode='property'){
+ if(!o)return;
+ const t=focusPointFor(o),from={...cameraTarget,zoom};
+ const to={...t,zoom:mode==='parent'?.72:(o.type==='FLAT'?2.0:1.35)};
+ const start=performance.now(),duration=o.type==='FLAT'?480:320;
+ cancelAnimationFrame(anim);
+ function frame(now){const k=Math.min(1,(now-start)/duration),e=1-Math.pow(1-k,3);cameraTarget.x=from.x+(to.x-from.x)*e;cameraTarget.y=from.y+(to.y-from.y)*e;cameraTarget.z=from.z+(to.z-from.z)*e;zoom=from.zoom+(to.zoom-from.zoom)*e;draw();if(k<1)anim=requestAnimationFrame(frame)}
+ anim=requestAnimationFrame(frame);
+ const fh=document.getElementById('focusHud');
+ if(fh) fh.textContent=o.type==='FLAT'?`Visual focus: ${o.name} • fast focus`:`Visual focus: ${o.name}`;
+}
+function setScope(parent,focus=null,mode='property'){
+ activeParent=parent;visibleObjects=DATA.objects.filter(o=>o.parent_2d_ulpin===parent);
+ selected=focus&&focus.parent_2d_ulpin===parent?focus:(visibleObjects.find(o=>o.type==='BUILDING')||visibleObjects[0]||null);
+ renderDetails();draw();animateFocus(selected,mode);
+}
+function searchNow(){
+ if(!search||!results)return;
+ const raw=search.value.trim(),q=raw.toLowerCase();
+ if(!q){results.innerHTML='<div class="result">Enter a unit ID, flat name, or ULPIN.</div>';return}
+ const matches=DATA.objects.filter(o=>o.name.toLowerCase().includes(q)||o.ulpin_3d.toLowerCase().includes(q)||o.owner.toLowerCase().includes(q)||o.unit_id.toLowerCase().includes(q));
+ results.innerHTML=matches.slice(0,8).map(o=>`<div class="result" data-id="${o.id}"><strong>${o.name}</strong> (${o.ulpin_3d})</div>`).join('')||'<div class="result">No matching property.</div>';
+ results.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{const o=byId[el.dataset.id];setScope(o.parent_2d_ulpin,o,'property')});
+}
+if(search){search.addEventListener('input',searchNow);search.addEventListener('keydown',e=>{if(e.key==='Enter')searchNow()});}
+
+function resizeCanvas(){
+ if(!canvas)return;
+ const d=devicePixelRatio||1;
+ canvas.width=canvas.clientWidth*d;canvas.height=canvas.clientHeight*d;
+ ctx.setTransform(d,0,0,d,0,0);
+ draw();
+}
+window.addEventListener('resize',resizeCanvas);
+if(canvas){
+ canvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+ canvas.addEventListener('pointerup',()=>dragging=false);canvas.addEventListener('pointercancel',()=>dragging=false);
+ canvas.addEventListener('pointermove',e=>{if(!dragging)return;if(viewMode==='3d'){yaw+=(e.clientX-lastX)*.009;pitch+=(e.clientY-lastY)*.006;pitch=Math.max(-.45,Math.min(.7,pitch))}else yaw+=(e.clientX-lastX)*.003;lastX=e.clientX;lastY=e.clientY;draw()});
+ canvas.addEventListener('wheel',e=>{e.preventDefault();zoom*=Math.exp(-e.deltaY*.0011);zoom=Math.max(.22,Math.min(3.25,zoom));draw()},{passive:false});
 }
 
-function toggleUpdate(){document.getElementById('updateIdWrap').classList.toggle('hidden',getVal('op')!=='update')}
+const v3dBtn=document.getElementById('view3d'),vTopBtn=document.getElementById('viewTop');
+if(v3dBtn) v3dBtn.onclick=()=>{viewMode='3d';v3dBtn.classList.add('active');if(vTopBtn)vTopBtn.classList.remove('active');draw()};
+if(vTopBtn) vTopBtn.onclick=()=>{viewMode='top';vTopBtn.classList.add('active');if(v3dBtn)v3dBtn.classList.remove('active');pitch=.2;draw()};
 
-function lookupProperty(){
- const id = getVal('searchId').toUpperCase();
- if(!id) return warn('Missing 3D ULPIN','Enter a 3D ULPIN before searching.');
- 
- const local = localStorage.getItem('vcad_record_' + id);
- if(local) {
-   return renderResult(JSON.parse(local), false);
- }
- 
- if(registry[id]) {
-   return renderResult(registry[id], false);
- }
+document.querySelectorAll('.floorbar button').forEach(b=>b.addEventListener('click',()=>{
+ floorMode=b.dataset.floor;document.querySelectorAll('.floorbar button').forEach(x=>x.classList.toggle('active',x===b));draw();
+}));
 
- const parts = id.split('-');
- // Extract the first 14 characters dynamically based on the user's input
- const parentId = id.length >= 14 ? id.substring(0, 14) : "12345678912345";
- const floorLvl = parts[1] || "F01";
- const unitId = parts[4] || "012";
+function project(p){
+ if(!canvas)return{x:0,y:0,z:0};
+ const q={x:p.x-cameraTarget.x,y:p.y-cameraTarget.y,z:p.z-cameraTarget.z};
+ if(viewMode==='top'){const c=Math.cos(yaw),sn=Math.sin(yaw),x=q.x*c-q.z*sn,z=q.x*sn+q.z*c,scale=125*zoom;return{x:canvas.clientWidth/2+x*scale,y:canvas.clientHeight*.55+z*scale,z:z}}
+ const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+ let x=q.x*cy-q.z*sy,z=q.x*sy+q.z*cy,y=q.y*cp-z*sp;z=q.y*sp+z*cp;
+ const scale=150*zoom;return{x:canvas.clientWidth/2+x*scale,y:canvas.clientHeight*.67-y*scale,z}
+}
+function box(cx,cy,cz,w,h,d,color,object,alpha=.82){
+ if(!ctx)return{};
+ const pts=[[-w/2,0,-d/2],[w/2,0,-d/2],[w/2,h,-d/2],[-w/2,h,-d/2],[-w/2,0,d/2],[w/2,0,d/2],[w/2,h,d/2],[-w/2,h,d/2]].map(a=>project({x:a[0]+cx,y:a[1]+cy,z:a[2]+cz}));
+ const faces=[[0,1,2,3],[1,5,6,2],[5,4,7,6],[4,0,3,7],[3,2,6,7]],isBuilding=object?.type==='BUILDING',isSelected=object&&selected===object;
+ ctx.globalAlpha=isBuilding?.20:(isSelected?1:alpha);
+ if(viewMode==='top'){
+  const pp=[[-w/2,0,-d/2],[w/2,0,-d/2],[w/2,0,d/2],[-w/2,0,d/2]].map(a=>project({x:a[0]+cx,y:cy,z:a[2]+cz}));
+  ctx.beginPath();ctx.moveTo(pp[0].x,pp[0].y);pp.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.closePath();ctx.fillStyle=isSelected?'#ffd166':color;ctx.fill();ctx.strokeStyle=isSelected?'#ffd166':(isBuilding?'#aebbd6':'#34415f');ctx.lineWidth=isSelected?2.5:1;ctx.stroke();
+ }else{
+  faces.forEach(f=>{ctx.beginPath();ctx.moveTo(pts[f[0]].x,pts[f[0]].y);f.slice(1).forEach(i=>ctx.lineTo(pts[i].x,pts[i].y));ctx.closePath();ctx.fillStyle=isSelected?'#ffd166':color;ctx.fill();ctx.strokeStyle=isSelected?'#ffd166':(isBuilding?'#aebbd6':'#34415f');ctx.lineWidth=isSelected?2.2:1;ctx.stroke()});
+ }
+ ctx.globalAlpha=1;return{object};
+}
+function draw(){
+ if(!ctx||!canvas)return;
+ ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);
+ ctx.fillStyle=viewMode==='top'?'#10182a':'#0c1322';ctx.fillRect(0,0,canvas.clientWidth,canvas.clientHeight);
+ const inScope=id=>visibleObjects.some(o=>o.id===id&&floorAllowed(o));
+ if(inScope('building_a')) box(0,0,0,6.5,6.9,3.65,'#71809b',byId.building_a,.26);
  
- const dynamicRecord = {
-   threeDULPIN: id,
-   parentULPIN: parentId,
-   name: `Unit ${unitId}`,
-   space: "Vertical / Building",
-   floor: floorLvl,
-   area: (Math.random() * 50 + 60).toFixed(1),
-   address: "Amaravathi, Andhra Pradesh, India",
-   lat: 16.5062,
-   lon: 80.5214,
-   status: "Approved / Published",
-   validation: "PASS — Geometry & Topology Valid",
-   rights: parts[3] === "COM" ? "Common" : "Private",
-   version: parts[5] || "V01"
+ const slabs=[['g0',0,0,6.25,0.16,'#59677e'],['f1',2.75,0,6.25,.12,'#657995'],['f2',5.45,0,6.25,.12,'#7286a4']];
+ slabs.forEach(([key,y,z,w,h,col])=>{if(floorMode==='all'||floorMode===key){box(0,y,0,w,h,3.55,col,null,.24)}});
+ 
+ const hits=[];
+ flatDefs.forEach(a=>{if(inScope(a[0].id)) hits.push(box(a[1],a[2],a[3],a[4],a[5],a[6],a[0].rights==='PRV'?'#314c73':'#49655d',a[0],.86))});
+ simpleDefs.forEach(a=>{if(inScope(a[0])) hits.push(box(a[1],a[2],a[3],a[4],a[5],a[6],a[7],byId[a[0]],.78))});
+ if(floorMode==='all'){
+  if(inScope('cellar_1')) hits.push(box(0,-.65,0,5.2,.25,2.5,'#39445a',byId.cellar_1,.45));
+  if(inScope('terrace_1')) hits.push(box(0,6.42,0,5.4,.12,2.8,'#49655d',byId.terrace_1,.6));
+ }
+}
+
+if(canvas){
+ canvas.addEventListener('click',e=>{
+  const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
+  const candidates=visibleObjects.filter(o=>floorAllowed(o)&&centers[o.id]).map(o=>{const p=project(centers[o.id]);return{o,d:Math.hypot(p.x-x,p.y-y)}}).sort((a,b)=>a.d-b.d);
+  if(candidates[0]&&candidates[0].d<75){select(candidates[0].o);animateFocus(candidates[0].o,'property')}
+ });
+}
+const spinBtn=document.getElementById('spinBtn');
+if(spinBtn){
+ spinBtn.onclick=()=>{
+  autoSpin=!autoSpin;spinBtn.textContent=autoSpin?'■ Stop 360°':'↻ 360°';
+  if(autoSpin){
+   function spinFrame(){if(!autoSpin)return;yaw+=.006;draw();spinRef=requestAnimationFrame(spinFrame)}
+   let spinRef=requestAnimationFrame(spinFrame);
+  }
  };
- 
- return renderResult(dynamicRecord, false);
+}
+const resetBtn=document.getElementById('resetBtn');
+if(resetBtn){
+ resetBtn.onclick=()=>{
+  cancelAnimationFrame(anim);autoSpin=false;
+  yaw=-.45;pitch=.2;zoom=.72;cameraTarget={x:0,y:2.9,z:0};floorMode='all';
+  document.querySelectorAll('.floorbar button').forEach(b=>b.classList.toggle('active',b.dataset.floor==='all'));viewMode='3d';
+  if(v3dBtn)v3dBtn.classList.add('active');if(vTopBtn)vTopBtn.classList.remove('active');draw();
+ };
 }
 
-function renderResult(d,failed){
- const r=document.getElementById('result');r.classList.remove('hidden');
- r.innerHTML=`<div class="card half"><div class="sectionline"></div><h3>Property Details</h3><div class="kv"><div>3D ULPIN</div><div>${d.threeDULPIN||'—'}</div><div>Parent ULPIN</div><div>${d.parentULPIN||'—'}</div><div>Property</div><div>${d.name||'—'}</div><div>Space class</div><div>${d.space||'—'}</div><div>Floor / Z-level</div><div>${d.floor||'—'}</div><div>Area</div><div>${d.area||'—'} m²</div><div>Status</div><div>${d.status||'—'}</div><div>Validation</div><div>${d.validation||'—'}</div></div></div>
- <div class="card half"><div class="sectionline"></div><h3>Location</h3><div class="map"><div class="pin">📍</div></div><p><strong>${d.address||'Location unavailable'}</strong></p><div class="actions"><button class="btn outline" onclick="openMap(${d.lat||0},${d.lon||0})">Get Location</button></div></div>
- <div class="card third"><div class="sectionline"></div><h3>Blueprint</h3><div class="asset"><div><div class="icon">▧</div><strong class="${failed?'failed':''}">${failed?'Failed to load':'Blueprint available'}</strong><br><small>Source document</small></div></div></div>
- <div class="card third"><div class="sectionline"></div><h3>3D Model</h3><div class="asset"><div><div class="icon">◇</div><strong class="${failed?'failed':''}">${failed?'Failed to load':'3D model available'}</strong><br><small>3D Tiles / model endpoint</small></div></div></div>
- <div class="card third"><div class="sectionline"></div><h3>Rights & Version</h3><div class="kv"><div>Rights</div><div>${d.rights||'—'}</div><div>Version</div><div>${d.version||'—'}</div></div></div>`;
-}
+// Initialization
+setTimeout(()=>{resizeCanvas();setScope("12345678901234",byId.flat_101,'property');}, 100);
 
-function openMap(lat,lon){if(!lat&&!lon)return warn('Location unavailable','The backend did not return coordinates for this property.');window.open('https://www.google.com/maps?q='+lat+','+lon,'_blank')}
 function refreshAdmin(){const ok=role==='admin';document.getElementById('adminGate').classList.toggle('hidden',ok);document.getElementById('adminPanel').classList.toggle('hidden',!ok)}
-
+function toggleUpdate(){document.getElementById('updateIdWrap').classList.toggle('hidden',getVal('op')!=='update')}
 function saveProperty(){
  if(role!=='admin')return warn('Access denied','Administrator authentication is required.');
- let threeD;try{threeD=make3DULPIN()}catch(e){return warn('Invalid record',e.message)}
- const file=document.getElementById('blueprint').files[0];
- if(file && file.size>25*1024*1024)return warn('File too large','Blueprint files must be 25 MB or smaller.');
- 
- const data={
-   parentULPIN:getVal('parent'),
-   threeDULPIN:threeD,
-   name:getVal('pname'),
-   space:getVal('space'),
-   floor:getVal('floor'),
-   rights:getVal('rights'),
-   unitId:getVal('unit'),
-   area:getVal('area'),
-   address:getVal('addr'),
-   blueprintName:file?.name||null
- };
- 
- if(!data.name)return warn('Incomplete record','Property / Unit Name is required.');
- document.getElementById('generatedId').textContent=threeD;
- 
- localStorage.setItem('vcad_record_'+threeD, JSON.stringify({
-   ...data,
-   status:'Approved / Published',
-   validation:'PASS — Geometry Valid',
-   version:'V01',
-   lat:16.5062,
-   lon:80.5214
- }));
- 
- warn('Registration Successful', '3D ULPIN generated and securely recorded: ' + threeD + '. The property is now active in the registry.');
+ let parent=getVal('parent'), unit=getVal('unit'), floor=getVal('floor');
+ if(!/^\d{14}$/.test(parent)) return warn('Invalid Parent ULPIN','Must be exactly 14 digits.');
+ const generated3D=`${parent}-${floor}-V-PRV-${unit}-V01`;
+ document.getElementById('generatedId').textContent=generated3D;
+ warn('Registration Successful', '3D ULPIN generated and securely recorded: ' + generated3D);
 }
-
-function resetAdmin(){document.querySelectorAll('#adminPanel input,#adminPanel textarea').forEach(x=>x.value='');document.getElementById('generatedId').textContent='Will be generated after submission';toggleUpdate()}
-
-const translations={
- en:{'Home':'Home','Property Search':'Property Search','Administration':'Administration','About 3D ULPIN':'About 3D ULPIN','Sign out':'Sign out','Not signed in':'Not signed in','Search Property':'Search Property','Administrator Login':'Administrator Login','Secure Portal Login':'Secure Portal Login','Sign in':'Sign in','Cancel':'Cancel','User ID':'User ID','Password':'Password','Account type':'Account type','User / Citizen':'User / Citizen','Administrator':'Administrator','Citizen / User Services':'Citizen / User Services','Register / Update Property':'Register / Update Property','Create new record':'Create new record','Update existing record':'Update existing record','Parent 2D ULPIN':'Parent 2D ULPIN','Rights / Use Code':'Rights / Use Code','Unit ID':'Unit ID','Property / Unit Name':'Property / Unit Name','Space Class':'Space Class','Floor / Z-level':'Floor / Z-level','Area (m²)':'Area (m²)','Location / Address':'Location / Address','Blueprint / source document':'Blueprint / source document','Save / Submit':'Save / Submit','Reset':'Reset','Generated 3D ULPIN:':'Generated 3D ULPIN:','Search 3D Property Record':'Search 3D Property Record','Fetch Property':'Fetch Property','Clear':'Clear','Property Details':'Property Details','Location':'Location','Blueprint':'Blueprint','3D Model':'3D Model','Rights & Version':'Rights & Version','Get Location':'Get Location','Record Governance':'Record Governance'},
- hi:{'Home':'मुख्य पृष्ठ','Property Search':'संपत्ति खोज','Administration':'प्रशासन','About 3D ULPIN':'3D ULPIN के बारे में','Sign out':'साइन आउट','Not signed in':'साइन इन नहीं है','Search Property':'संपत्ति खोजें','Administrator Login':'प्रशासक लॉगिन','Secure Portal Login':'सुरक्षित पोर्टल लॉगिन','Sign in':'साइन इन','Cancel':'रद्द करें','User ID':'उपयोगकर्ता आईडी','Password':'पासवर्ड','Account type':'खाता प्रकार','User / Citizen':'उपयोगकर्ता / नागरिक','Administrator':'प्रशासक','Citizen / User Services':'नागरिक / उपयोगकर्ता सेवाएँ','Register / Update Property':'संपत्ति पंजीकरण / अपडेट','Create new record':'नया रिकॉर्ड बनाएँ','Update existing record':'मौजूदा रिकॉर्ड अपडेट करें','Parent 2D ULPIN':'मूल 2D ULPIN','Rights / Use Code':'अधिकार / उपयोग कोड','Unit ID':'इकाई आईडी','Property / Unit Name':'संपत्ति / इकाई का नाम','Space Class':'स्थान वर्ग','Floor / Z-level':'मंज़िल / Z-स्तर','Area (m²)':'क्षेत्रफल (m²)','Location / Address':'स्थान / पता','Blueprint / source document':'ब्लूप्रिंट / स्रोत दस्तावेज़','Save / Submit':'सहेजें / जमा करें','Reset':'रीसेट','Generated 3D ULPIN:':'निर्मित 3D ULPIN:','Search 3D Property Record':'3D संपत्ति रिकॉर्ड खोजें','Fetch Property':'संपत्ति प्राप्त करें','Clear':'साफ़ करें','Property Details':'संपत्ति विवरण','Location':'स्थान','Blueprint':'ब्लूप्रिंट','3D Model':'3D मॉडल','Rights & Version':'अधिकार और संस्करण','Get Location':'स्थान प्राप्त करें','Record Governance':'रिकॉर्ड प्रशासन'},
- te:{'Home':'హోమ్','Property Search':'ఆస్తి శోధన','Administration':'పరిపాలన','About 3D ULPIN':'3D ULPIN గురించి','Sign out':'సై అవుట్','Not signed in':'సైన్ ఇన్ కాలేదు','Search Property':'ఆస్తిని శోధించండి','Administrator Login':'నిర్వాహక లాగిన్','Secure Portal Login':'సురక్షిత పోర్టల్ లాగిన్','Sign in':'సైన్ ఇన్','Cancel':'రద్దు','User ID':'వినియోగదారు ID','Password':'పాస్‌వర్డ్','Account type':'ఖాతా రకం','User / Citizen':'వినియోగదారు / పౌరుడు','Administrator':'నిర్వాహకుడు','Citizen / User Services':'పౌర / వినియోగదారు సేవలు','Register / Update Property':'ఆస్తి నమోదు / నవీకరణ','Create new record':'కొత్త రికార్డు సృష్టించండి','Update existing record':'ఉన్న రికార్డును నవీకరించండి','Parent 2D ULPIN':'మాతృ 2D ULPIN','Rights / Use Code':'హక్కులు / వినియోగ కోడ్','Unit ID':'యూనిట్ ID','Property / Unit Name':'ఆస్తి / యూనిట్ పేరు','Space Class':'స్థల వర్గం','Floor / Z-level':'అంతస్తు / Z-స్థాయి','Area (m²)':'విస్తీర్ణం (m²)','Location / Address':'స్థానం / చిరునామా','Blueprint / source document':'బ్లూప్రింట్ / మూల పత్రం','Save / Submit':'సేవ్ / సమర్పించండి','Reset':'రీసెట్','Generated 3D ULPIN:':'రూపొందించిన 3D ULPIN:','Search 3D Property Record':'3D ఆస్తి రికార్డు శోధన','Fetch Property':'ఆస్తి పొందండి','Clear':'క్లియర్','Property Details':'ఆస్తి వివరాలు','Location':'స్థానం','Blueprint':'బ్లూప్రింట్','3D Model':'3D మోడల్','Rights & Version':'హక్కులు & వెర్షన్','Get Location':'స్థానం పొందండి','Record Governance':'రికార్డు నిర్వహణ'},
- ta:{'Home':'முகப்பு','Property Search':'சொத்து தேடல்','Administration':'நிர்வாகம்','About 3D ULPIN':'3D ULPIN பற்றி','Sign out':'வெளியேறு','Not signed in':'உள்நுழையவில்லை','Search Property':'சொத்தை தேடு','Administrator Login':'நிர்வாகி உள்நுழைவு','Secure Portal Login':'பாதுகாப்பான உள்நுழைவு','Sign in':'உள்நுழை','Cancel':'ரத்து','User ID':'பயனர் ID','Password':'கடவுச்சொல்','Account type':'கணக்கு வகை','User / Citizen':'பயனர் / குடிமகன்','Administrator':'நிர்வாகி','Citizen / User Services':'குடிமகன் / பயனர் சேவைகள்','Register / Update Property':'சொத்து பதிவு / புதுப்பிப்பு','Create new record':'புதிய பதிவு உருவாக்கு','Update existing record':'ஏற்கனவே உள்ள பதிவை புதுப்பி','Parent 2D ULPIN':'மூல 2D ULPIN','Rights / Use Code':'உரிமை / பயன்பாட்டு குறியீடு','Unit ID':'அலகு ID','Property / Unit Name':'சொத்து / அலகு பெயர்','Space Class':'இட வகை','Floor / Z-level':'தளம் / Z-நிலை','Area (m²)':'பரப்பளவு (m²)','Location / Address':'இடம் / முகவரி','Blueprint / source document':'வரைபடம் / மூல ஆவணம்','Save / Submit':'சேமி / சமர்ப்பி','Reset':'மீட்டமை','Generated 3D ULPIN:':'உருவாக்கப்பட்ட 3D ULPIN:','Search 3D Property Record':'3D சொத்து பதிவை தேடு','Fetch Property':'சொத்தை பெறு','Clear':'அழி','Property Details':'சொத்து விவரங்கள்','Location':'இடம்','Blueprint':'வரைபடம்','3D Model':'3D மாதிரி','Rights & Version':'உரிமைகள் & பதிப்பு','Get Location':'இடத்தை பெறு','Record Governance':'பதிவு நிர்வாகம்'},
- bn:{'Home':'হোম','Property Search':'সম্পত্তি অনুসন্ধান','Administration':'প্রশাসন','About 3D ULPIN':'3D ULPIN সম্পর্কে','Sign out':'সাইন আউট','Search Property':'সম্পত্তি খুঁজুন','Administrator Login':'প্রশাসক লগইন','Sign in':'সাইন ইন','Cancel':'বাতিল','User ID':'ব্যবহারকারী আইডি','Password':'পাসওয়ার্ড','Account type':'অ্যাকাউন্টের ধরন','User / Citizen':'ব্যবহারকারী / নাগরিক','Administrator':'প্রশাসক','Register / Update Property':'সম্পত্তি নিবন্ধন / আপডেট','Create new record':'নতুন রেকর্ড তৈরি করুন','Update existing record':'বিদ্যমান রেকর্ড আপডেট করুন','Parent 2D ULPIN':'মূল 2D ULPIN','Rights / Use Code':'অধিকার / ব্যবহার কোড','Unit ID':'ইউনিট ID','Property / Unit Name':'সম্পত্তি / ইউনিটের নাম','Space Class':'স্থান শ্রেণি','Floor / Z-level':'তলা / Z-স্তর','Area (m²)':'এলাকা (m²)','Location / Address':'অবস্থান / ঠিকানা','Blueprint / source document':'ব্লুপ্রিন্ট / উৎস নথি','Save / Submit':'সংরক্ষণ / জমা','Reset':'রিসেট','Generated 3D ULPIN:':'তৈরি 3D ULPIN:','Search 3D Property Record':'3D সম্পত্তি রেকর্ড খুঁজুন','Fetch Property':'সম্পত্তি আনুন','Clear':'পরিষ্কার','Property Details':'সম্পত্তির বিবরণ','Location':'অবস্থান','Blueprint':'ব্লুপ্রিন্ট','3D Model':'3D মডেল','Rights & Version':'অধিকার ও সংস্করণ','Get Location':'অবস্থান পান','Record Governance':'রেকর্ড পরিচালনা'}
-};
-['as','brx','doi','gu','kn','ks','kok','mai','ml','mni','mr','ne','or','pa','sa','sat','sd','ur'].forEach(c=>translations[c]=translations.en);
-translations.mr={...translations.hi};
-
-function applyLanguage(code){
- localStorage.setItem('ulpin_lang',code);document.documentElement.lang=code;document.documentElement.dir=code==='ur'?'rtl':'ltr';
- const tr=translations[code]||translations.en;
- document.querySelectorAll('body *').forEach(el=>{if(el.children.length===0 && el.textContent.trim() && tr[el.textContent.trim()])el.textContent=tr[el.textContent.trim()]});
- document.querySelectorAll('input,textarea').forEach(el=>{if(el.placeholder){const key=el.placeholder; if(tr[key])el.placeholder=tr[key]}});
-}
-
-function boot(){document.getElementById('lang').addEventListener('change',e=>applyLanguage(e.target.value));const saved=localStorage.getItem('ulpin_lang')||'en';document.getElementById('lang').value=saved;applyLanguage(saved);document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>show(b.dataset.page));document.getElementById('logout').onclick=logout;const rr=sessionStorage.getItem("ulpin_role");if(rr){role=rr;updateRole()}show('home')}
-boot();
+function resetAdmin(){document.querySelectorAll('#adminPanel input,#adminPanel textarea').forEach(x=>x.value='');document.getElementById('generatedId').textContent='Will be generated after submission'}
 </script>
-</body></html>
+</body>
+</html>
