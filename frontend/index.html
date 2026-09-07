@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>3D ULPIN | Vertical Property Mapping</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="https://unpkg.com/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
+</head>
+<body>
+  <div class="top-accent"></div>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#" id="brandHome" aria-label="3D ULPIN home">
+        <div class="emblem" aria-hidden="true"><span>☸</span></div>
+        <div class="brand-copy">
+          <div class="eyebrow">DIGITAL LAND RECORDS</div>
+          <div class="brand-name">3D ULPIN</div>
+          <div class="brand-subtitle">Vertical Property Identification & Mapping</div>
+        </div>
+      </a>
+
+      <div class="header-tools">
+        <div class="security-pill"><span class="dot"></span> Secure submission</div>
+        <label class="language-control">
+          <span class="sr-only">Language</span>
+          <select id="languageSelect" aria-label="Select language">
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="te">తెలుగు</option>
+            <option value="ta">தமிழ்</option>
+            <option value="bn">বাংলা</option>
+            <option value="mr">मराठी</option>
+            <option value="gu">ગુજરાતી</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="ml">മലയാളം</option>
+            <option value="or">ଓଡ଼ିଆ</option>
+            <option value="pa">ਪੰਜਾਬੀ</option>
+            <option value="as">অসমীয়া</option>
+            <option value="ur">اردو</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <nav class="primary-nav">
+    <div class="shell nav-inner">
+      <button class="nav-link active" data-nav="registration" type="button">Property Registration</button>
+      <button class="nav-link" data-nav="records" type="button">3D Property Records</button>
+      <button class="nav-link" data-nav="help" type="button">Help & Guidelines</button>
+    </div>
+  </nav>
+
+  <main class="shell main">
+    <div class="breadcrumb"><span>Home</span><span>›</span><strong>Property Registration</strong></div>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="section-kicker">PROPERTY SERVICES</div>
+        <h1>Convert a 2D land record into a <em>3D property record</em></h1>
+        <p>Submit the existing 2D ULPIN, property details and blueprint. Your authorised backend processes the submission and returns the 3D ULPIN, model and property record.</p>
+        <div class="hero-points">
+          <span><b>01</b> Existing 2D ULPIN</span>
+          <span><b>02</b> Property details</span>
+          <span><b>03</b> Blueprint</span>
+        </div>
+      </div>
+      <div class="hero-process" aria-label="Submission process">
+        <div class="process-title">PROCESS</div>
+        <div class="process-step current"><span>1</span><div><strong>Submit</strong><small>Property + blueprint</small></div></div>
+        <div class="process-line"></div>
+        <div class="process-step"><span>2</span><div><strong>Process</strong><small>Backend validation</small></div></div>
+        <div class="process-line"></div>
+        <div class="process-step"><span>3</span><div><strong>Receive</strong><small>3D property record</small></div></div>
+      </div>
+    </section>
+
+    <div id="message" class="inline-message hidden" role="status"></div>
+
+    <section class="card submission-card">
+      <div class="card-header">
+        <div>
+          <div class="card-number">01</div>
+          <div>
+            <h2>Property submission</h2>
+            <p>Enter information exactly as available in the land/property record.</p>
+          </div>
+        </div>
+        <span class="required"><i>*</i> Required fields</span>
+      </div>
+
+      <form id="propertyForm" novalidate>
+        <section class="form-block">
+          <div class="block-heading">
+            <span class="block-icon">ID</span>
+            <div><h3>Existing land identity</h3><p>The parent parcel's existing 2D identifier.</p></div>
+          </div>
+          <div class="field full">
+            <label for="ulpin">2D ULPIN <i>*</i></label>
+            <div class="input-with-badge">
+              <input id="ulpin" name="ulpin" type="text" maxlength="32" autocomplete="off" placeholder="Enter existing 2D ULPIN" required>
+              <span>LAND PARCEL</span>
+            </div>
+            <small>Use the ULPIN already issued for the parent land parcel.</small>
+          </div>
+        </section>
+
+        <section class="form-block">
+          <div class="block-heading">
+            <span class="block-icon">02</span>
+            <div><h3>Property details</h3><p>Basic details used to identify the property.</p></div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="propertyName">Property / Building name <i>*</i></label>
+              <input id="propertyName" name="propertyName" type="text" placeholder="e.g. Green Heights" required>
+            </div>
+            <div class="field">
+              <label for="propertyType">Property type <i>*</i></label>
+              <select id="propertyType" name="propertyType" required>
+                <option value="">Select property type</option>
+                <option>Residential Building</option><option>Commercial Building</option>
+                <option>Mixed Use</option><option>Apartment Complex</option>
+                <option>Institutional</option><option>Independent House</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid three">
+            <div class="field"><label for="state">State / UT <i>*</i></label><input id="state" name="state" type="text" placeholder="e.g. Telangana" required></div>
+            <div class="field"><label for="district">District <i>*</i></label><input id="district" name="district" type="text" placeholder="e.g. Hyderabad" required></div>
+            <div class="field"><label for="locality">Village / Ward / Locality</label><input id="locality" name="locality" type="text" placeholder="Enter locality"></div>
+          </div>
+
+          <div class="grid three">
+            <div class="field"><label for="surveyNumber">Survey / Plot No.</label><input id="surveyNumber" name="surveyNumber" type="text" placeholder="e.g. 125/3A"></div>
+            <div class="field"><label for="floors">Number of floors</label><input id="floors" name="floors" type="number" min="0" max="200" placeholder="e.g. 5"></div>
+            <div class="field"><label for="area">Parcel area (m²)</label><input id="area" name="area" type="number" min="0" step="0.01" placeholder="e.g. 850"></div>
+          </div>
+
+          <div class="field full"><label for="address">Property address <i>*</i></label><textarea id="address" name="address" rows="3" placeholder="Complete property address" required></textarea></div>
+        </section>
+
+        <section class="form-block blueprint-block">
+          <div class="block-heading">
+            <span class="block-icon">03</span>
+            <div><h3>Blueprint / building plan</h3><p>Upload the available plan for processing and 3D model generation.</p></div>
+          </div>
+
+          <div id="dropzone" class="upload-zone" tabindex="0" role="button" aria-label="Upload blueprint">
+            <input id="blueprint" name="blueprint" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff,.dwg,.dxf" hidden>
+            <div class="upload-illustration" aria-hidden="true">
+              <div class="paper"><span>+</span></div>
+              <div class="upload-arrow">↑</div>
+            </div>
+            <div class="upload-copy">
+              <strong>Drop your blueprint here</strong>
+              <span>or <button id="browseBtn" type="button" class="text-button">browse files</button></span>
+              <small>PDF, PNG, JPG, JPEG, WEBP, TIFF, DWG or DXF · up to 25 MB</small>
+            </div>
+          </div>
+          <div id="filePreview" class="file-preview hidden"></div>
+        </section>
+
+        <section class="form-footer">
+          <label class="consent"><input id="confirm" name="confirm" type="checkbox" required><span>I confirm that the information provided corresponds to the submitted property record and blueprint.</span></label>
+          <div class="actions">
+            <button class="secondary-button" type="button" id="resetBtn">Clear form</button>
+            <button class="primary-button" type="submit" id="submitBtn"><span>Submit for 3D processing</span><b>→</b></button>
+          </div>
+        </section>
+      </form>
+    </section>
+
+    <section id="resultSection" class="card result-card hidden">
+      <div class="result-header">
+        <div class="result-status"><span>✓</span> RECORD RECEIVED</div>
+        <h2>3D property record</h2>
+        <p>Assets returned by the backend are shown below.</p>
+      </div>
+
+      <div class="result-id-row">
+        <div><span>3D ULPIN</span><strong id="resultUlpIn">—</strong></div>
+        <button id="copyId" type="button">Copy</button>
+      </div>
+
+      <div class="result-layout">
+        <div class="result-details-panel">
+          <div class="panel-title">PROPERTY DETAILS</div>
+          <div id="resultDetails" class="details-grid"></div>
+        </div>
+        <div class="asset-panel">
+          <div class="panel-title">BLUEPRINT</div>
+          <div class="asset-frame">
+            <img id="resultBlueprintImage" class="blueprint-image hidden" alt="Returned blueprint">
+            <iframe id="resultBlueprintPdf" class="blueprint-pdf hidden" title="Returned blueprint PDF"></iframe>
+            <div id="blueprintFallback" class="asset-empty"><span class="asset-icon">▧</span><strong>Blueprint returned by backend</strong><small>No preview URL was provided.</small></div>
+          </div>
+          <a id="blueprintLink" class="asset-link hidden" target="_blank" rel="noopener">Open blueprint ↗</a>
+        </div>
+        <div class="asset-panel model-panel">
+          <div class="panel-title">3D MODEL</div>
+          <div class="model-frame">
+            <model-viewer id="modelViewer" class="hidden" camera-controls auto-rotate shadow-intensity="1" exposure="1" alt="Returned 3D model"></model-viewer>
+            <div id="modelFallback" class="asset-empty"><span class="asset-icon cube">◇</span><strong>3D model</strong><small>The generated model from the backend will appear here.</small></div>
+          </div>
+          <a id="modelLink" class="asset-link hidden" target="_blank" rel="noopener">Open 3D model ↗</a>
+        </div>
+      </div>
+
+      <div class="result-footer"><span><b>Status:</b> Successfully received from backend</span><button id="newSubmission" class="secondary-button" type="button">Create another submission</button></div>
+    </section>
+
+    <div class="prototype-note"><span>i</span><div><strong>Frontend / backend boundary</strong><p>This interface does not generate the 3D ULPIN or model. It sends the form as <code>multipart/form-data</code> to the configured API and renders the response. The API contract is configurable in <code>config.js</code>.</p></div></div>
+  </main>
+
+  <div id="helpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="modal-backdrop" data-close="helpModal"></div>
+    <div class="modal-card">
+      <div class="modal-icon info">i</div><div class="modal-body"><h2 id="helpTitle">Help & Guidelines</h2><p>Enter the existing 2D ULPIN, property details and blueprint. The frontend forwards these fields to your backend. The backend should return a 3D ULPIN and asset URLs.</p><button class="primary-button" type="button" data-close="helpModal">OK</button></div>
+    </div>
+  </div>
+
+  <div id="errorModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="warningTitle">
+    <div class="modal-backdrop" data-close="errorModal"></div>
+    <div class="modal-card warning"><div class="modal-icon warning">!</div><div class="modal-body"><h2 id="warningTitle">Warning</h2><p id="modalText"></p><button id="modalClose" class="primary-button" type="button">OK</button></div></div>
+  </div>
+
+  <footer class="site-footer"><div class="shell"><span>3D ULPIN Prototype</span><span>Digital Land Records · Frontend only</span></div></footer>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
