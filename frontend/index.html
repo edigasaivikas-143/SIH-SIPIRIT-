@@ -35,7 +35,6 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 .model-body{flex:1;display:grid;grid-template-columns:1fr 340px;overflow:hidden}
 .model-viewport{position:relative;background:#080c17;width:100%;height:100%}
 .model-viewport canvas{width:100%!important;height:100%!important;display:block;touch-action:none}
-.model-hud{position:absolute;left:14px;top:14px;background:rgba(12,17,30,.88);border:1px solid #2b3857;padding:8px 12px;border-radius:6px;color:#fff;font-size:11px;z-index:3}
 .model-viewbar{position:absolute;right:14px;top:14px;display:flex;gap:5px;z-index:3}
 .model-viewbar button{border:1px solid #2b3857;background:rgba(12,17,30,.9);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-weight:600;font-size:11px}
 .model-viewbar button.active{border-color:var(--selected);color:var(--selected)}
@@ -109,7 +108,6 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
     </div>
     <div class="model-body">
       <div class="model-viewport">
-        <div class="model-hud"><strong id="modelHudParent">Building scope: 12345678912345</strong><span style="font-size:9px;color:#9eabc4">Click model elements to inspect</span></div>
         <div class="model-viewbar"><button id="modView3D" class="active">3D</button><button id="modViewTop">TOP</button><button id="modReset">RESET</button><button id="modSpin">↻ 360°</button></div>
         <div class="model-floorbar"><button data-floor="all" class="active">ALL</button><button data-floor="g0">GROUND</button><button data-floor="f1">F1</button><button data-floor="f2">F2</button><button data-floor="b1">BASEMENT</button></div>
         <canvas id="modelCanvas"></canvas>
@@ -190,7 +188,7 @@ function refreshAdmin(){const ok=role==='admin';document.getElementById('adminGa
 function getVal(id){return document.getElementById(id)?.value?.trim()||""}
 
 // --- Interactive 3D Model & Owner Directory Engine ---
-let modCanvas, modCtx, modYaw=-.45, modPitch=.20, modZoom=.72, modDragging=false, modLastX=0, modLastY=0, modViewMode='3d', modFloorMode='all', modCamTarget={x:0,y:2.9,z:0}, modAutoSpin=false, modSpinRaf=null, selectedObjId=null;
+let modCanvas, modCtx, modYaw=-.45, modPitch=.20, modZoom=0.45, modDragging=false, modLastX=0, modLastY=0, modViewMode='3d', modFloorMode='all', modCamTarget={x:0,y:2.9,z:0}, modAutoSpin=false, modSpinRaf=null, selectedObjId=null;
 
 const byId = Object.fromEntries(DATA.objects.map(o=>[o.id,o]));
 const modCenters={flat_101:[-1.55,1.45,0],flat_102:[1.55,1.45,0],flat_201:[-1.55,4.15,0],flat_202:[1.55,4.15,0],parking_p01:[-2.7,.18,2.5],parking_p02:[2.7,.18,2.5],plot_17:[-2.1,.12,3.45],stairs_s1:[0,3.0,2.1],fire_f1:[0,3.2,1.92],park_1:[-4,.12,-.7],lawn_1:[3.8,.12,-.7],terrace_1:[0,6.05,0],cellar_1:[0,-.55,0],building_a:[0,3.0,0]};
@@ -200,9 +198,6 @@ const modSimpleDefs=[['parking_p01',-2.7,.02,2.5,1.25,.45,1,'#314c73'],['parking
 function open3DModelViewer(){
   const modal = document.getElementById('modelModal');
   modal.classList.remove('hidden');
-  const parentId = currentLoadedProperty ? currentLoadedProperty.parentULPIN : "12345678901234";
-  document.getElementById('modelHudParent').textContent = "Building scope: " + parentId;
-  
   renderOwnerDirectory();
   setTimeout(() => { initModelCanvas(); }, 100);
 }
@@ -230,7 +225,7 @@ function selectModelObject(id){
   const obj = byId[id];
   if(obj && modCenters[id]){
     modCamTarget = { x: modCenters[id][0], y: modCenters[id][1], z: modCenters[id][2] };
-    modZoom = obj.type === 'FLAT' ? 2.0 : 1.2;
+    modZoom = obj.type === 'FLAT' ? 1.5 : 0.8;
   }
   renderOwnerDirectory();
   drawMod();
@@ -255,7 +250,6 @@ function initModelCanvas(){
     });
     modCanvas.addEventListener('wheel',e=>{e.preventDefault();modZoom*=Math.exp(-e.deltaY*.0011);modZoom=Math.max(.22,Math.min(3.25,modZoom));drawMod()},{passive:false});
     
-    // Click selection on 3D canvas
     modCanvas.addEventListener('click', e => {
       const rect = modCanvas.getBoundingClientRect();
       const x = e.clientX - rect.left, y = e.clientY - rect.top;
@@ -366,7 +360,7 @@ const modReset=document.getElementById('modReset');
 if(modReset){
   modReset.onclick=()=>{
     modAutoSpin=false;cancelAnimationFrame(modSpinRaf);if(modSpin)modSpin.textContent='↻ 360°';
-    modYaw=-.45;modPitch=.2;modZoom=.72;modCamTarget={x:0,y:2.9,z:0};modFloorMode='all';
+    modYaw=-.45;modPitch=.2;modZoom=0.45;modCamTarget={x:0,y:2.9,z:0};modFloorMode='all';
     document.querySelectorAll('.model-floorbar button').forEach(b=>b.classList.toggle('active',b.dataset.floor==='all'));
     modViewMode='3d';if(m3d)m3d.classList.add('active');if(mTop)mTop.classList.remove('active');drawMod();
   };
