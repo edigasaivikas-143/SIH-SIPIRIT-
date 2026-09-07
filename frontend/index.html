@@ -28,11 +28,12 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 .footer{margin-top:35px;background:var(--navy);color:#fff;padding:24px}.footerin{max-width:1240px;margin:auto;padding:0 22px;font-size:12px;line-height:1.6}
 .modal{position:fixed;inset:0;background:rgba(10,25,38,.52);display:grid;place-items:center;z-index:20}.modalbox{width:min(440px,92vw);background:#fff;border-top:5px solid var(--saffron);padding:22px;box-shadow:0 10px 35px #0003}.warnicon{font-size:38px;color:#b77900}.modal h3{margin:8px 0;color:var(--navy)}
 
-/* 3D Model Viewer Modal Specifics */
-.model-modal{position:fixed;inset:0;background:rgba(7,12,23,.85);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
-.model-box{width:850px;max-width:95vw;height:550px;background:#0c1322;border:1px solid #2b3857;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
+/* Interactive 3D Model Modal Viewer with Owner Directory */
+.model-modal{position:fixed;inset:0;background:rgba(7,12,23,.85);display:flex;align-items:center;justify-content:center;z-index:100;padding:15px}
+.model-box{width:1050px;max-width:98vw;height:620px;background:#0c1322;border:1px solid #2b3857;border-radius:10px;display:flex;flex-direction:column;overflow:hidden}
 .model-header{padding:12px 18px;background:#121a2d;border-bottom:1px solid #2b3857;display:flex;justify-content:space-between;align-items:center;color:#fff}
-.model-viewport{flex:1;position:relative;background:#080c17;width:100%;height:100%}
+.model-body{flex:1;display:grid;grid-template-columns:1fr 340px;overflow:hidden}
+.model-viewport{position:relative;background:#080c17;width:100%;height:100%}
 .model-viewport canvas{width:100%!important;height:100%!important;display:block;touch-action:none}
 .model-hud{position:absolute;left:14px;top:14px;background:rgba(12,17,30,.88);border:1px solid #2b3857;padding:8px 12px;border-radius:6px;color:#fff;font-size:11px;z-index:3}
 .model-viewbar{position:absolute;right:14px;top:14px;display:flex;gap:5px;z-index:3}
@@ -42,7 +43,17 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 .model-floorbar button{border:1px solid #2b3857;background:rgba(12,17,30,.88);color:#9eabc4;padding:5px 8px;border-radius:5px;cursor:pointer;font-weight:600;font-size:10px}
 .model-floorbar button.active{border-color:#8fa3c8;color:#fff;background:#202c45}
 
-@media(max-width:800px){.half,.third{grid-column:span 12}.row{grid-template-columns:1fr}.tools{display:none}.top{padding:12px}.navin{overflow:auto}.nav button{white-space:nowrap}.kv{grid-template-columns:1fr}}
+/* Owner Directory Side Panel */
+.owner-sidebar{background:#121a2d;border-left:1px solid #2b3857;display:flex;flex-direction:column;overflow:hidden;padding:14px}
+.owner-sidebar h4{margin:0 0 10px;color:#fff;font-size:13px;border-bottom:1px solid #2b3857;padding-bottom:8px}
+.owner-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.owner-item{background:#1a2540;border:1px solid #2b3857;border-radius:6px;padding:9px;cursor:pointer;transition:all .15s}
+.owner-item:hover,.owner-item.active{border-color:var(--selected);background:#202c45}
+.owner-item strong{color:#fff;font-size:12px;display:block}
+.owner-item span{color:#9eabc4;font-size:10px;font-family:monospace;display:block;margin-top:2px}
+.owner-item .meta{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:#6ea8ff}
+
+@media(max-width:850px){.model-body{grid-template-columns:1fr;grid-template-rows:1fr 240px}.model-box{height:90vh}}
 </style>
 <script src="config.js"></script></head>
 <body>
@@ -89,18 +100,24 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 <footer class="footer"><div class="footerin"><strong>V-CAD — 3D ULPIN Generation & Vertical Property Mapping</strong></div></footer>
 <div id="modal" class="modal hidden"><div class="modalbox"><div class="warnicon">⚠</div><h3 id="modalTitle">Warning</h3><p id="modalText"></p><div class="actions"><button class="btn primary" onclick="closeModal()">OK</button></div></div></div>
 
-<!-- Interactive 3D Model Modal Viewer -->
+<!-- Interactive 3D Model Modal Viewer with Owner Directory -->
 <div id="modelModal" class="model-modal hidden">
   <div class="model-box">
     <div class="model-header">
-      <strong id="modalBuildingTitle">3D Building Scope & Neighbor Flats</strong>
+      <strong id="modalBuildingTitle">3D Building Scope, Owners & ULPIN Directory</strong>
       <button class="btn outline" style="padding:4px 10px; color:#fff; border-color:#2b3857" onclick="closeModelModal()">✕ Close</button>
     </div>
-    <div class="model-viewport">
-      <div class="model-hud"><strong id="modelHudParent">Building scope: 12345678912345</strong><span style="font-size:9px;color:#9eabc4">Multi-level volumetric cadastre</span></div>
-      <div class="model-viewbar"><button id="modView3D" class="active">3D</button><button id="modViewTop">TOP</button><button id="modReset">RESET</button><button id="modSpin">↻ 360°</button></div>
-      <div class="model-floorbar"><button data-floor="all" class="active">ALL</button><button data-floor="g0">GROUND</button><button data-floor="f1">F1</button><button data-floor="f2">F2</button><button data-floor="b1">BASEMENT</button></div>
-      <canvas id="modelCanvas"></canvas>
+    <div class="model-body">
+      <div class="model-viewport">
+        <div class="model-hud"><strong id="modelHudParent">Building scope: 12345678912345</strong><span style="font-size:9px;color:#9eabc4">Click model elements to inspect</span></div>
+        <div class="model-viewbar"><button id="modView3D" class="active">3D</button><button id="modViewTop">TOP</button><button id="modReset">RESET</button><button id="modSpin">↻ 360°</button></div>
+        <div class="model-floorbar"><button data-floor="all" class="active">ALL</button><button data-floor="g0">GROUND</button><button data-floor="f1">F1</button><button data-floor="f2">F2</button><button data-floor="b1">BASEMENT</button></div>
+        <canvas id="modelCanvas"></canvas>
+      </div>
+      <div class="owner-sidebar">
+        <h4>Property Owners & 3D ULPINs</h4>
+        <div id="ownerList" class="owner-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -172,24 +189,51 @@ function openMap(lat,lon){if(!lat&&!lon)return warn('Location unavailable','Coor
 function refreshAdmin(){const ok=role==='admin';document.getElementById('adminGate').classList.toggle('hidden',ok);document.getElementById('adminPanel').classList.toggle('hidden',!ok)}
 function getVal(id){return document.getElementById(id)?.value?.trim()||""}
 
-// --- Robust 3D Model Viewer Modal Engine ---
-let modCanvas, modCtx, modYaw=-.45, modPitch=.20, modZoom=.72, modDragging=false, modLastX=0, modLastY=0, modViewMode='3d', modFloorMode='all', modCamTarget={x:0,y:2.9,z:0}, modAutoSpin=false, modSpinRaf=null;
+// --- Interactive 3D Model & Owner Directory Engine ---
+let modCanvas, modCtx, modYaw=-.45, modPitch=.20, modZoom=.72, modDragging=false, modLastX=0, modLastY=0, modViewMode='3d', modFloorMode='all', modCamTarget={x:0,y:2.9,z:0}, modAutoSpin=false, modSpinRaf=null, selectedObjId=null;
+
+const byId = Object.fromEntries(DATA.objects.map(o=>[o.id,o]));
+const modCenters={flat_101:[-1.55,1.45,0],flat_102:[1.55,1.45,0],flat_201:[-1.55,4.15,0],flat_202:[1.55,4.15,0],parking_p01:[-2.7,.18,2.5],parking_p02:[2.7,.18,2.5],plot_17:[-2.1,.12,3.45],stairs_s1:[0,3.0,2.1],fire_f1:[0,3.2,1.92],park_1:[-4,.12,-.7],lawn_1:[3.8,.12,-.7],terrace_1:[0,6.05,0],cellar_1:[0,-.55,0],building_a:[0,3.0,0]};
+const modFlatDefs=[['flat_101', -1.55,1.45,0,2.55,2.35,1.45],['flat_102', 1.55,1.45,0,2.55,2.35,1.45],['flat_201', -1.55,4.15,0,2.55,2.35,1.45],['flat_202', 1.55,4.15,0,2.55,2.35,1.45]];
+const modSimpleDefs=[['parking_p01',-2.7,.02,2.5,1.25,.45,1,'#314c73'],['parking_p02',2.7,.02,2.5,1.25,.45,1,'#314c73'],['plot_17',-2.1,.02,3.45,2.1,.18,.75,'#314c73'],['stairs_s1',0,.02,2.1,.75,6.0,.55,'#49655d'],['fire_f1',0,2.4,1.92,.35,1.4,.25,'#49655d'],['terrace_1',0,6.42,0,5.4,.12,2.8,'#49655d'],['cellar_1',0,-.65,0,5.2,.25,2.5,'#39445a']];
 
 function open3DModelViewer(){
   const modal = document.getElementById('modelModal');
   modal.classList.remove('hidden');
-  const parentId = currentLoadedProperty ? currentLoadedProperty.parentULPIN : "12345678912345";
+  const parentId = currentLoadedProperty ? currentLoadedProperty.parentULPIN : "12345678901234";
   document.getElementById('modelHudParent').textContent = "Building scope: " + parentId;
   
-  setTimeout(() => {
-    initModelCanvas();
-  }, 100);
+  renderOwnerDirectory();
+  setTimeout(() => { initModelCanvas(); }, 100);
 }
 
 function closeModelModal(){
   document.getElementById('modelModal').classList.add('hidden');
   modAutoSpin = false;
   cancelAnimationFrame(modSpinRaf);
+}
+
+function renderOwnerDirectory(){
+  const list = document.getElementById('ownerList');
+  if(!list) return;
+  list.innerHTML = DATA.objects.map(o => `
+    <div class="owner-item ${selectedObjId===o.id?'active':''}" onclick="selectModelObject('${o.id}')">
+      <strong>${o.name} (${o.type})</strong>
+      <span>ULPIN: ${o.ulpin_3d}</span>
+      <div class="meta"><span>Owner: ${o.owner}</span><span>Floor: ${o.floor}</span></div>
+    </div>
+  `).join('');
+}
+
+function selectModelObject(id){
+  selectedObjId = id;
+  const obj = byId[id];
+  if(obj && modCenters[id]){
+    modCamTarget = { x: modCenters[id][0], y: modCenters[id][1], z: modCenters[id][2] };
+    modZoom = obj.type === 'FLAT' ? 2.0 : 1.2;
+  }
+  renderOwnerDirectory();
+  drawMod();
 }
 
 function initModelCanvas(){
@@ -210,6 +254,19 @@ function initModelCanvas(){
       modLastX=e.clientX;modLastY=e.clientY;drawMod();
     });
     modCanvas.addEventListener('wheel',e=>{e.preventDefault();modZoom*=Math.exp(-e.deltaY*.0011);modZoom=Math.max(.22,Math.min(3.25,modZoom));drawMod()},{passive:false});
+    
+    // Click selection on 3D canvas
+    modCanvas.addEventListener('click', e => {
+      const rect = modCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      const candidates = DATA.objects.filter(o => modFloorAllowed(o) && modCenters[o.id]).map(o => {
+        const p = projectMod({x:modCenters[o.id][0], y:modCenters[o.id][1], z:modCenters[o.id][2]});
+        return { o, d: Math.hypot(p.x - x, p.y - y) };
+      }).sort((a,b)=>a.d-b.d);
+      if(candidates[0] && candidates[0].d < 65){
+        selectModelObject(candidates[0].o.id);
+      }
+    });
   }
   drawMod();
 }
@@ -226,9 +283,6 @@ function resizeModCanvas(){
 }
 window.addEventListener('resize', resizeModCanvas);
 
-const modFlatDefs=[[0, -1.55,1.45,0,2.55,2.35,1.45],[1, 1.55,1.45,0,2.55,2.35,1.45],[2, -1.55,4.15,0,2.55,2.35,1.45],[3, 1.55,4.15,0,2.55,2.35,1.45]];
-const modSimpleDefs=[['parking_p01',-2.7,.02,2.5,1.25,.45,1,'#314c73'],['parking_p02',2.7,.02,2.5,1.25,.45,1,'#314c73'],['plot_17',-2.1,.02,3.45,2.1,.18,.75,'#314c73'],['stairs_s1',0,.02,2.1,.75,6.0,.55,'#49655d'],['fire_f1',0,2.4,1.92,.35,1.4,.25,'#49655d'],['terrace_1',0,6.42,0,5.4,.12,2.8,'#49655d'],['cellar_1',0,-.65,0,5.2,.25,2.5,'#39445a']];
-
 function modFloorAllowed(o){
   if(modFloorMode==='all') return true;
   if(modFloorMode==='f1') return o.floor==='F01'||o.id==='building_a'||o.id==='stairs_s1'||o.id==='fire_f1'||o.id==='terrace_1';
@@ -240,7 +294,7 @@ function modFloorAllowed(o){
 
 function projectMod(p){
   const q={x:p.x-modCamTarget.x,y:p.y-modCamTarget.y,z:p.z-modCamTarget.z};
-  const w = modCanvas ? modCanvas.clientWidth : 800;
+  const w = modCanvas ? modCanvas.clientWidth : 700;
   const h = modCanvas ? modCanvas.clientHeight : 500;
   if(modViewMode==='top'){const c=Math.cos(modYaw),sn=Math.sin(modYaw),x=q.x*c-q.z*sn,z=q.x*sn+q.z*c,scale=125*modZoom;return{x:w/2+x*scale,y:h*.55+z*scale,z:z}}
   const cy=Math.cos(modYaw),sy=Math.sin(modYaw),cp=Math.cos(modPitch),sp=Math.sin(modPitch);
@@ -250,44 +304,46 @@ function projectMod(p){
 
 function boxMod(cx,cy,cz,w,h,d,color,object,alpha=.82){
   const pts=[[-w/2,0,-d/2],[w/2,0,-d/2],[w/2,h,-d/2],[-w/2,h,-d/2],[-w/2,0,d/2],[w/2,0,d/2],[w/2,h,d/2],[-w/2,h,d/2]].map(a=>projectMod({x:a[0]+cx,y:a[1]+cy,z:a[2]+cz}));
-  const faces=[[0,1,2,3],[1,5,6,2],[5,4,7,6],[4,0,3,7],[3,2,6,7]],isBuilding=object?.type==='BUILDING';
-  modCtx.globalAlpha=isBuilding?.20:alpha;
+  const faces=[[0,1,2,3],[1,5,6,2],[5,4,7,6],[4,0,3,7],[3,2,6,7]];
+  const isBuilding = object?.type==='BUILDING';
+  const isSelected = object && selectedObjId===object.id;
+  
+  modCtx.globalAlpha = isBuilding ? .20 : (isSelected ? 1 : alpha);
+  const fillColor = isSelected ? '#ffd166' : color;
+  
   if(modViewMode==='top'){
     const pp=[[-w/2,0,-d/2],[w/2,0,-d/2],[w/2,0,d/2],[-w/2,0,d/2]].map(a=>projectMod({x:a[0]+cx,y:cy,z:a[2]+cz}));
-    modCtx.beginPath();modCtx.moveTo(pp[0].x,pp[0].y);pp.slice(1).forEach(p=>modCtx.lineTo(p.x,p.y));modCtx.closePath();modCtx.fillStyle=color;modCtx.fill();modCtx.strokeStyle=isBuilding?'#aebbd6':'#34415f';modCtx.lineWidth=1;modCtx.stroke();
+    modCtx.beginPath();modCtx.moveTo(pp[0].x,pp[0].y);pp.slice(1).forEach(p=>modCtx.lineTo(p.x,p.y));modCtx.closePath();modCtx.fillStyle=fillColor;modCtx.fill();modCtx.strokeStyle=isSelected?'#ffd166':(isBuilding?'#aebbd6':'#34415f');modCtx.lineWidth=isSelected?2.5:1;modCtx.stroke();
   }else{
-    faces.forEach(f=>{modCtx.beginPath();modCtx.moveTo(pts[f[0]].x,pts[f[0]].y);f.slice(1).forEach(i=>modCtx.lineTo(pts[i].x,pts[i].y));modCtx.closePath();modCtx.fillStyle=color;modCtx.fill();modCtx.strokeStyle=isBuilding?'#aebbd6':'#34415f';modCtx.lineWidth=1;modCtx.stroke()});
+    faces.forEach(f=>{modCtx.beginPath();modCtx.moveTo(pts[f[0]].x,pts[f[0]].y);f.slice(1).forEach(i=>modCtx.lineTo(pts[i].x,pts[i].y));modCtx.closePath();modCtx.fillStyle=fillColor;modCtx.fill();modCtx.strokeStyle=isSelected?'#ffd166':(isBuilding?'#aebbd6':'#34415f');modCtx.lineWidth=isSelected?2.5:1;modCtx.stroke()});
   }
   modCtx.globalAlpha=1;
 }
 
 function drawMod(){
   if(!modCtx||!modCanvas)return;
-  const w = modCanvas.clientWidth || 800;
+  const w = modCanvas.clientWidth || 700;
   const h = modCanvas.clientHeight || 500;
   modCtx.clearRect(0,0,w,h);
   modCtx.fillStyle=modViewMode==='top'?'#10182a':'#0c1322';modCtx.fillRect(0,0,w,h);
   
-  const objs = DATA.objects;
-  const byId = Object.fromEntries(objs.map(o=>[o.id,o]));
-  const inScope=id=>objs.some(o=>o.id===id&&modFloorAllowed(o));
+  const inScope=id=>DATA.objects.some(o=>o.id===id&&modFloorAllowed(o));
   if(inScope('building_a')) boxMod(0,0,0,6.5,6.9,3.65,'#71809b',byId.building_a,.26);
   
   const slabs=[['g0',0,0,6.25,0.16,'#59677e'],['f1',2.75,0,6.25,.12,'#657995'],['f2',5.45,0,6.25,.12,'#7286a4']];
   slabs.forEach(([key,y,z,w_s,h_s,col])=>{if(modFloorMode==='all'||modFloorMode===key){boxMod(0,y,0,w_s,h_s,3.55,col,null,.24)}});
   
-  const flatObjs=[objs[1], objs[2], objs[3], objs[4]];
-  modFlatDefs.forEach((a,i)=>{
-    const obj=flatObjs[i];
+  modFlatDefs.forEach(([id,cx,cy,cz,w,h,d])=>{
+    const obj=byId[id];
     if(obj && modFloorAllowed(obj)){
-      boxMod(a[1],a[2],a[3],a[4],a[5],a[6],obj.rights==='PRV'?'#314c73':'#49655d',obj,.86);
+      boxMod(cx,cy,cz,w,h,d,obj.rights==='PRV'?'#314c73':'#49655d',obj,.86);
     }
   });
   
-  modSimpleDefs.forEach(a=>{
-    const obj=objs.find(o=>o.id===a[0]);
+  modSimpleDefs.forEach(([id,cx,cy,cz,w,h,d,col])=>{
+    const obj=byId[id];
     if(obj && modFloorAllowed(obj)){
-      boxMod(a[1],a[2],a[3],a[4],a[5],a[6],a[7],obj,.78);
+      boxMod(cx,cy,cz,w,h,d,col,obj,.78);
     }
   });
 }
