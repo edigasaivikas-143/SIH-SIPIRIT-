@@ -117,14 +117,34 @@
   ["dragleave","drop"].forEach(ev=>dropzone.addEventListener(ev,e=>{e.preventDefault();dropzone.classList.remove("drag")}));
   dropzone.addEventListener("drop",e=>chooseFile(e.dataTransfer.files[0]));
 
-  document.querySelectorAll(".nav-link").forEach(btn=>btn.addEventListener("click",()=>{
-    document.querySelectorAll(".nav-link").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
-    if(btn.dataset.nav==="registration")document.querySelector(".submission-card").scrollIntoView({behavior:"smooth"});
-    if(btn.dataset.nav==="records"){
-      if(resultSection.classList.contains("hidden"))modal("errorModal","No 3D property record has been received yet. Submit a property first.");
-      else resultSection.scrollIntoView({behavior:"smooth"});
+  let mapViewer;
+
+  document.querySelectorAll(".nav-link").forEach(btn => btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-link").forEach(x => x.classList.remove("active"));
+    btn.classList.add("active");
+
+    const mapCard = document.getElementById("cityMapSection");
+
+    if (btn.dataset.nav === "registration") {
+      mapCard.classList.add("hidden");
+      document.querySelector(".submission-card").scrollIntoView({behavior:"smooth"});
     }
-    if(btn.dataset.nav==="help")modal("helpModal");
+
+    if (btn.dataset.nav === "records") {
+      mapCard.classList.remove("hidden");
+      mapCard.scrollIntoView({behavior:"smooth"});
+
+      if (!mapViewer) {
+        mapViewer = new Cesium.Viewer("cesiumContainer");
+        mapViewer.scene.primitives.add(Cesium.createOsmBuildings());
+        mapViewer.camera.flyTo({
+          destination: Cesium.Cartesian3.fromDegrees(-87.6298, 41.8781, 800),
+          orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45) }
+        });
+      }
+    }
+
+    if (btn.dataset.nav === "help") modal("helpModal");
   }));
 
   form.addEventListener("submit",async e=>{
@@ -137,7 +157,6 @@
     }
 
     const fd=new FormData();
-    // Explicit names keep the frontend/backend contract stable.
     ["ulpin","propertyName","propertyType","state","district","locality","surveyNumber","floors","area","address"].forEach(name=>{
       const el=form.elements[name]; if(el)fd.append(name,el.value);
     });
