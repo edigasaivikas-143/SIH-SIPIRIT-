@@ -54,7 +54,7 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 </div></section>
 
 <section id="lookup" class="page hidden"><div class="crumb">Home / Property Search</div><div class="hero"><h2>Search 3D Property Record</h2><p>Enter the 3D ULPIN supplied by the land-record authority.</p></div>
-<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 98765432101234-F01-V-PRV-012-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 12345678912345-F01-V-PRV-012-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
 <div class="card half"><div class="sectionline"></div><h3>Access Notice</h3><p style="color:var(--muted);line-height:1.6">Only property information authorised for the signed-in account is returned. Restricted utility and ownership information remains access-controlled.</p></div></div>
 <div id="result" class="grid hidden"></div></section>
 
@@ -72,7 +72,7 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 </section>
 
 <section id="about" class="page hidden"><div class="crumb">Home / About</div><div class="hero"><h2>About the 3D ULPIN Extension</h2><p>The prototype retains the parent ULPIN as the base parcel identity and represents vertical, underground, elevated and air-right spaces as distinct 3D cadastral objects.</p></div>
-<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Illustrative 3D Identifier</h3><p><strong>98765432101234-F01-V-PRV-012-V01</strong></p><p style="color:var(--muted)">Parent ULPIN • Z-Level • Space Class • Rights/Use • Unit • Version</p></div><div class="card half"><div class="sectionline"></div><h3>Interoperability</h3><p>Designed for API-based integration and geospatial exchange including GeoJSON, CityGML/3D city models, IFC/BIM, LAS/LAZ and 3D Tiles.</p></div></div></section>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Illustrative 3D Identifier</h3><p><strong>12345678912345-F01-V-PRV-012-V01</strong></p><p style="color:var(--muted)">Parent ULPIN • Z-Level • Space Class • Rights/Use • Unit • Version</p></div><div class="card half"><div class="sectionline"></div><h3>Interoperability</h3><p>Designed for API-based integration and geospatial exchange including GeoJSON, CityGML/3D city models, IFC/BIM, LAS/LAZ and 3D Tiles.</p></div></div></section>
 </main>
 <footer class="footer"><div class="footerin"><strong>V-CAD — 3D ULPIN Generation & Vertical Property Mapping</strong><br>Smart India Hackathon prototype • Spatial records are subject to authorised verification and publication.</div></footer>
 <div id="modal" class="modal hidden"><div class="modalbox"><div class="warnicon">⚠</div><h3 id="modalTitle">Warning</h3><p id="modalText"></p><div class="actions"><button class="btn primary" onclick="closeModal()">OK</button></div></div></div>
@@ -81,7 +81,7 @@ window.APP_CONFIG={API_BASE:"http://localhost:8000/api"};
 let mode="standalone",role=null,token=null;
 
 const registry={
-"98765432101234-F01-V-PRV-012-V01":{threeDULPIN:"98765432101234-F01-V-PRV-012-V01",parentULPIN:"98765432101234",name:"Unit 012",space:"Vertical / Building",floor:"F01",area:"120.5",address:"Amaravathi, Andhra Pradesh",lat:16.5062,lon:80.5214,status:"Approved / Published",validation:"PASS — Geometry Valid",rights:"Private",version:"V01"}
+"12345678912345-F01-V-PRV-012-V01":{threeDULPIN:"12345678912345-F01-V-PRV-012-V01",parentULPIN:"12345678912345",name:"Unit 012",space:"Vertical / Building",floor:"F01",area:"120.5",address:"Amaravathi, Andhra Pradesh",lat:16.5062,lon:80.5214,status:"Approved / Published",validation:"PASS — Geometry Valid",rights:"Private",version:"V01"}
 };
 
 function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==="admin")refreshAdmin()}
@@ -124,7 +124,7 @@ function lookupProperty(){
  }
 
  const parts = id.split('-');
- const parentId = (parts[0] && parts[0].length === 14) ? parts[0] : "98765432101234";
+ const parentId = (parts[0] && parts[0].length === 14) ? parts[0] : "12345678912345";
  const floorLvl = parts[1] || "F01";
  const unitId = parts[4] || "012";
  
