@@ -1,0 +1,5 @@
+numpy==1.26.4
+open3d==0.18.0
+torch==2.4.1
+shapely==2.0.6
+scikit-learn==1.5.2

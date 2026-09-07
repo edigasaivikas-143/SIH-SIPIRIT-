@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ulpin3d
+      POSTGRES_USER: ulpin3d
+      POSTGRES_PASSWORD: ulpin3d
+    ports:
+      - "5432:5432"
+    volumes:
+      - ulpin3d_pgdata:/var/lib/postgresql/data
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql://ulpin3d:ulpin3d@db:5432/ulpin3d
+      ULPIN_DEMO_MODE: "true"   # flip to "false" once the DB-backed routes replace the in-memory store
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/v1
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  ulpin3d_pgdata:
