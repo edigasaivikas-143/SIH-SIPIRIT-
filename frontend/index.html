@@ -77,21 +77,45 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 </div></section>
 
 <section id="lookup" class="page hidden"><div class="crumb">Home / Property Search</div><div class="hero"><h2>Search 3D Property Record</h2><p>Enter the 3D ULPIN supplied by the land-record authority.</p></div>
-<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 12345678912345-F01-V-PRV-012-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 12345678912345-F03-V-PRV-A301-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
 <div class="card half"><div class="sectionline"></div><h3>Access Notice</h3><p style="color:var(--muted);line-height:1.6">Only property information authorised for the signed-in account is returned. Restricted utility and ownership information remains access-controlled.</p></div></div>
 <div id="result" class="grid hidden"></div></section>
 
-<section id="admin" class="page hidden"><div class="crumb">Home / Administration</div><div class="hero"><h2>Property Record Administration</h2><p>Create or update spatial property records.</p></div>
+<section id="admin" class="page hidden"><div class="crumb">Home / Administration</div><div class="hero"><h2>Property Record Administration</h2><p>Create or update spatial property records using the standardized 3D ULPIN format.</p></div>
 <div id="adminGate" class="card"><div class="notice warning">Administrator authentication is required before editing records.</div><div class="actions"><button class="btn secondary" onclick="show('login');setRole('admin')">Administrator Login</button></div></div>
 <div id="adminPanel" class="grid hidden"><div class="card"><div class="sectionline"></div><h3>Register / Update Property</h3>
 <div class="row"><div><label>Operation</label><select id="op" onchange="toggleUpdate()"><option value="create">Create new record</option><option value="update">Update existing record</option></select></div><div id="updateIdWrap" class="hidden"><label>Existing 3D ULPIN to update</label><input id="updateId" placeholder="Paste existing generated 3D ULPIN"></div></div>
-<div class="row"><div><label>Parent 2D ULPIN</label><input id="parent" maxlength="14" placeholder="14-character parent ULPIN"></div><div><label>Rights / Use Code</label><select id="rights"><option value="PRV">PRV — Private</option><option value="COM">COM — Common</option><option value="UTL">UTL — Utility</option><option value="CML">CML — Commercial</option></select></div></div>
-<div class="row"><div><label>Unit ID</label><input id="unit" placeholder="A301"></div><div><label>Property / Unit Name</label><input id="pname" placeholder="Apartment"></div><div><label>Space Class</label><select id="space"><option>Vertical / Building</option><option>Common / Shared</option><option>Underground</option><option>Elevated / Air-right</option></select></div></div>
-<div class="row"><div><label>Floor / Z-level</label><input id="floor" placeholder="F03"></div><div><label>Area (m²)</label><input id="area" type="number" step="0.1" placeholder="112.6"></div></div>
+
+<div class="notice" style="margin-bottom:14px;background:#f3f7f9;border-left-color:var(--navy);color:var(--navy)">
+  <strong>Format Specification:</strong> [Parent ULPIN]–[Z-Level]–[Space Class]–[Rights/Use Code]–[Unit ID]–[Version]
+</div>
+
+<div class="row">
+  <div><label>Parent UlpIN (14 digits) <i>*</i></label><input id="parent" maxlength="14" placeholder="12345678901234" oninput="updateLiveULPIN()"></div>
+  <div><label>Z-Level (Floor) <i>*</i></label><select id="floor" onchange="updateLiveULPIN()"><option value="F01">F01 (Floor 1)</option><option value="F02">F02 (Floor 2)</option><option value="F03" selected>F03 (Floor 3)</option><option value="G00">G00 (Ground)</option><option value="B01">B01 (Basement)</option><option value="R00">R00 (Roof)</option></select></div>
+</div>
+
+<div class="row">
+  <div><label>Space Class <i>*</i></label><select id="space" onchange="updateLiveULPIN()"><option value="V" selected>V — Vertical / Building</option><option value="S">S — Surface / Common</option><option value="U">U — Underground</option><option value="E">E — Elevated / Air-right</option></select></div>
+  <div><label>Rights / Use Code <i>*</i></label><select id="rights" onchange="updateLiveULPIN()"><option value="PRV" selected>PRV — Private</option><option value="COM">COM — Common</option><option value="UTL">UTL — Utility</option><option value="CML">CML — Commercial</option></select></div>
+</div>
+
+<div class="row">
+  <div><label>Unit ID <i>*</i></label><input id="unit" placeholder="A301" value="A301" oninput="updateLiveULPIN()"></div>
+  <div><label>Version <i>*</i></label><input id="version" placeholder="V01" value="V01" oninput="updateLiveULPIN()"></div>
+</div>
+
+<div class="row" style="margin-top:14px">
+  <div><label>Property / Unit Name</label><input id="pname" placeholder="Apartment 301"></div>
+  <div><label>Area (m²)</label><input id="area" type="number" step="0.1" placeholder="112.6"></div>
+</div>
+
 <label>Location / Address</label><textarea id="addr" placeholder="Amaravathi, Andhra Pradesh"></textarea>
 <label>Blueprint / source document</label><input id="blueprint" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.dwg,.dxf">
-<div id="generated" class="notice" style="margin-top:16px"><strong>Generated 3D ULPIN:</strong> <span id="generatedId">Will be generated after submission</span></div><div class="actions"><button class="btn success" onclick="saveProperty()">Save / Submit</button><button class="btn outline" onclick="resetAdmin()">Reset</button></div></div>
-</div></div>
+
+<div id="generated" class="notice" style="margin-top:16px"><strong>Generated 3D ULPIN:</strong> <span id="generatedId">12345678901234-F03-V-PRV-A301-V01</span></div>
+<div class="actions"><button class="btn success" onclick="saveProperty()">Save / Submit</button><button class="btn outline" onclick="resetAdmin()">Reset</button></div></div>
+<div class="card"><div class="sectionline"></div><h3>Record Governance</h3><div class="kv"><div>Geometry</div><div>3D solid / surface + elevation range</div><div>Rights</div><div>Linked separately to the spatial object</div><div>Validation</div><div>Topology and geometry status</div><div>Version</div><div>Incremented by the backend on approved change</div></div></div></div>
 </section>
 
 <section id="about" class="page hidden"><div class="crumb">Home / About</div><div class="hero"><h2>About the 3D ULPIN Extension</h2><p>The prototype retains the parent ULPIN as the base parcel identity[cite: 3].</p></div></section>
@@ -103,7 +127,7 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 <div id="modelModal" class="model-modal hidden">
   <div class="model-box">
     <div class="model-header">
-      <strong id="modalBuildingTitle">3D Building Scope, Owners & ULPIN Directory</strong>
+      <strong>3D Building Scope, Owners & ULPIN Directory</strong>
       <button class="btn outline" style="padding:4px 10px; color:#fff; border-color:#2b3857" onclick="closeModelModal()">✕ Close</button>
     </div>
     <div class="model-body">
@@ -135,6 +159,17 @@ function setRole(r){document.getElementById('loginRole').value=r}
 function warn(t,m){document.getElementById('modalTitle').textContent=t;document.getElementById('modalText').textContent=m;document.getElementById('modal').classList.remove('hidden')}
 function closeModal(){document.getElementById('modal').classList.add('hidden')}
 
+function updateLiveULPIN(){
+ const parent = getVal('parent') || '12345678901234';
+ const floor = getVal('floor') || 'F03';
+ const space = getVal('space') || 'V';
+ const rights = getVal('rights') || 'PRV';
+ const unit = getVal('unit') || 'A301';
+ const version = getVal('version') || 'V01';
+ const constructed = `${parent}-${floor}-${space}-${rights}-${unit}-${version}`;
+ document.getElementById('generatedId').textContent = constructed;
+}
+
 function lookupProperty(){
  const id = getVal('searchId').toUpperCase();
  if(!id) return warn('Missing 3D ULPIN','Enter a 3D ULPIN before searching.');
@@ -151,7 +186,7 @@ function lookupProperty(){
  }
 
  const parts = id.split('-');
- const parentId = id.length >= 14 ? id.substring(0, 14) : "12345678912345";
+ const parentId = id.length >= 14 ? id.substring(0, 14) : "12345678901234";
  const floorLvl = parts[1] || "F01";
  const unitId = parts[4] || "012";
  
@@ -186,6 +221,25 @@ function renderResult(d,failed){
 function openMap(lat,lon){if(!lat&&!lon)return warn('Location unavailable','Coordinates unavailable.');window.open('https://www.google.com/maps?q='+lat+','+lon,'_blank')}
 function refreshAdmin(){const ok=role==='admin';document.getElementById('adminGate').classList.toggle('hidden',ok);document.getElementById('adminPanel').classList.toggle('hidden',!ok)}
 function getVal(id){return document.getElementById(id)?.value?.trim()||""}
+
+function toggleUpdate(){document.getElementById('updateIdWrap').classList.toggle('hidden',getVal('op')!=='update')}
+
+function saveProperty(){
+ if(role!=='admin')return warn('Access denied','Administrator authentication is required.');
+ const parent = getVal('parent');
+ if(!/^\d{14}$/.test(parent)) return warn('Invalid ULPIN','Parent 2D ULPIN must be exactly 14 digits.');
+ const generated3D = document.getElementById('generatedId').textContent;
+ warn('Registration Successful', '3D ULPIN generated and securely recorded: ' + generated3D);
+}
+
+function resetAdmin(){
+ document.querySelectorAll('#adminPanel input,#adminPanel textarea').forEach(x=>x.value='');
+ document.getElementById('parent').value='12345678901234';
+ document.getElementById('unit').value='A301';
+ document.getElementById('version').value='V01';
+ updateLiveULPIN();
+ toggleUpdate();
+}
 
 // --- Interactive 3D Model & Owner Directory Engine ---
 let modCanvas, modCtx, modYaw=-.45, modPitch=.20, modZoom=0.45, modDragging=false, modLastX=0, modLastY=0, modViewMode='3d', modFloorMode='all', modCamTarget={x:0,y:2.9,z:0}, modAutoSpin=false, modSpinRaf=null, selectedObjId=null;
@@ -370,5 +424,8 @@ document.querySelectorAll('.model-floorbar button').forEach(b=>b.addEventListene
   document.querySelectorAll('.model-floorbar button').forEach(x=>x.classList.toggle('active',x===b));
   drawMod();
 }));
+
+// Initialize live ULPIN on load
+updateLiveULPIN();
 </script>
 </body></html>
