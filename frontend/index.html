@@ -1,241 +1,159 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#102a43">
-  <title>3D ULPIN | Vertical Property Mapping</title>
-  <link rel="stylesheet" href="styles.css">
-  <script type="module" src="https://unpkg.com/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
-  <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
-  <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-</head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V-CAD | 3D ULPIN Property Portal</title>
+<style>
+:root{--saffron:#e77817;--green:#138808;--navy:#18324b;--ink:#25313b;--muted:#66727c;--line:#d9dee3;--bg:#f5f7f8;--white:#fff;--danger:#b42318;--gold:#f4b942}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg)}
+body:before{content:"";display:block;height:4px;background:linear-gradient(90deg,var(--saffron) 0 33%,#fff 33% 66%,var(--green) 66%)}
+.header{background:#fff;border-bottom:1px solid var(--line)}.top{max-width:1240px;margin:auto;padding:14px 22px;display:flex;align-items:center;gap:16px}
+.emblem{width:50px;height:50px;border:2px solid var(--navy);border-radius:4px;display:grid;place-items:center;font-weight:800;color:var(--navy);font-size:13px;text-align:center}
+.brand h1{font-size:20px;margin:0;color:var(--navy)}.brand p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.tools{margin-left:auto;display:flex;gap:8px;align-items:center}.tools button,.tools select{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:3px}
+.nav{background:var(--navy);color:#fff}.navin{max-width:1240px;margin:auto;display:flex;align-items:center;min-height:44px;padding:0 22px}.nav button{color:#fff;background:transparent;border:0;padding:13px 16px;cursor:pointer}.nav button:hover,.nav button.active{background:rgba(255,255,255,.1);border-bottom:3px solid var(--saffron)}
+.wrap{max-width:1240px;margin:28px auto;padding:0 22px}.crumb{font-size:12px;color:var(--muted);margin-bottom:18px}
+.hero{background:#fff;border:1px solid var(--line);border-left:5px solid var(--saffron);padding:25px}.hero h2{margin:0 0 8px;color:var(--navy);font-size:26px}.hero p{margin:0;color:var(--muted);line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:18px}.card{grid-column:span 12;background:#fff;border:1px solid var(--line);padding:20px}.half{grid-column:span 6}.third{grid-column:span 4}
+.card h3{margin:0 0 16px;color:var(--navy);font-size:17px}.sectionline{height:3px;background:linear-gradient(90deg,var(--saffron),var(--saffron) 32%,#eee 32%,#eee 66%,var(--green) 66%);margin:-20px -20px 20px}
+label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,select,textarea{width:100%;padding:11px;border:1px solid #c9d0d6;border-radius:3px;background:#fff;font:inherit}textarea{min-height:90px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.btn{border:0;border-radius:3px;padding:11px 17px;cursor:pointer;font-weight:700}.primary{background:var(--saffron);color:#fff}.secondary{background:var(--navy);color:#fff}.success{background:var(--green);color:#fff}.outline{background:#fff;border:1px solid var(--navy);color:var(--navy)}.danger{background:#fff;border:1px solid #e4aaa5;color:var(--danger)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.hidden{display:none!important}
+.notice{padding:12px 14px;border-left:4px solid var(--green);background:#f0f8ef;font-size:13px}.warning{border-left-color:var(--gold);background:#fff9e9}.status{font-size:12px;padding:5px 8px;border-radius:3px;background:#eef2f5;display:inline-block}.ok{background:#e9f7e8;color:#116c09}.failed{background:#fff0ee;color:var(--danger)}
+.kv{display:grid;grid-template-columns:180px 1fr;border-top:1px solid var(--line)}.kv div{padding:10px;border-bottom:1px solid var(--line)}.kv div:nth-child(odd){font-weight:700;background:#fafbfc}
+.login{max-width:470px;margin:45px auto}.login .hero{text-align:center;border-left:0;border-top:5px solid var(--saffron)}
+.asset{min-height:210px;border:1px dashed #bcc5cc;background:#f8fafb;display:grid;place-items:center;color:var(--muted);text-align:center;padding:20px}.asset .icon{font-size:42px;color:var(--navy)}
+.map{height:270px;background:linear-gradient(135deg,#e9f1e7,#f6f4e8);border:1px solid var(--line);position:relative;overflow:hidden}.map:after{content:"";position:absolute;left:45%;top:20%;width:160px;height:160px;border:3px solid var(--green);transform:rotate(18deg);background:rgba(19,136,8,.08)}.pin{position:absolute;left:55%;top:45%;font-size:28px}
+.footer{margin-top:35px;background:var(--navy);color:#fff;padding:24px}.footerin{max-width:1240px;margin:auto;padding:0 22px;font-size:12px;line-height:1.6}
+.modal{position:fixed;inset:0;background:rgba(10,25,38,.52);display:grid;place-items:center;z-index:20}.modalbox{width:min(440px,92vw);background:#fff;border-top:5px solid var(--saffron);padding:22px;box-shadow:0 10px 35px #0003}.warnicon{font-size:38px;color:#b77900}.modal h3{margin:8px 0;color:var(--navy)}
+@media(max-width:800px){.half,.third{grid-column:span 12}.row{grid-template-columns:1fr}.tools{display:none}.top{padding:12px}.navin{overflow:auto}.nav button{white-space:nowrap}.kv{grid-template-columns:1fr}}
+</style>
+<script src="config.js"></script></head>
 <body>
-  <div class="top-accent"></div>
+<header class="header"><div class="top">
+<div class="emblem">भारत<br>INDIA</div><div class="brand"><h1>V-CAD — 3D ULPIN Property Portal</h1><p>Digital Land Records • Vertical Property Mapping & Verification</p></div>
+<div class="tools"><span id="roleBadge" class="status">Not signed in</span><select id="lang" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="as">অসমীয়া</option><option value="bn">বাংলা</option><option value="brx">बड़ो</option><option value="doi">डोगरी</option><option value="gu">ગુજરાતી</option><option value="kn">ಕನ್ನಡ</option><option value="ks">कॉशुर</option><option value="kok">कोंकणी</option><option value="mai">मैथिली</option><option value="ml">മലയാളം</option><option value="mni">মৈতৈলোন্</option><option value="mr">मराठी</option><option value="ne">नेपाली</option><option value="or">ଓଡ଼ିଆ</option><option value="pa">ਪੰਜਾਬੀ</option><option value="sa">संस्कृतम्</option><option value="sat">ᱥᱟᱱᱛᱟᱲᱤ</option><option value="sd">سنڌي</option><option value="ta">தமிழ்</option><option value="te">తెలుగు</option><option value="ur">اردو</option></select></div>
+</div></header>
+<nav class="nav"><div class="navin"><button data-page="home" class="active">Home</button><button data-page="lookup">Property Search</button><button data-page="admin">Administration</button><button data-page="about">About 3D ULPIN</button><button id="logout" class="hidden" style="margin-left:auto">Sign out</button></div></nav>
 
-  <header class="site-header">
-    <div class="shell header-inner">
-      <a class="brand" href="#" id="brandHome" aria-label="3D ULPIN home">
-        <div class="emblem" aria-hidden="true"><span>☸</span></div>
-        <div class="brand-copy">
-          <div class="eyebrow">DIGITAL LAND RECORDS</div>
-          <div class="brand-name">3D ULPIN</div>
-          <div class="brand-subtitle">Vertical Property Identification & Mapping</div>
-        </div>
-      </a>
+<main class="wrap">
+<section id="home" class="page">
+<div class="crumb">Home</div><div class="hero"><h2>3D Property Identity & Verification</h2><p>A government-style interface for viewing and administering vertical, underground and elevated property records linked to a parent ULPIN.</p></div>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Citizen / User Services</h3><p>Search an authorised property using its 3D ULPIN and inspect identity, location, elevation and available spatial documents.</p><div class="actions"><button class="btn primary" onclick="show('lookup')">Search Property</button></div></div>
+<div class="card half"><div class="sectionline"></div><h3>Administration</h3><p>Authorised administrators can register new cadastral objects and update existing records through the protected backend.</p><div class="actions"><button class="btn secondary" onclick="show('login');setRole('admin')">Administrator Login</button></div></div>
+<div class="card"><div class="sectionline"></div><div class="notice">The 3D identifier is an extension linked to the parent parcel identity. Geometry, rights, provenance and validation are maintained as separate records.</div></div></div>
+</section>
 
-      <div class="header-tools">
-        <div class="security-pill"><span class="dot"></span> Secure submission</div>
-        <label class="language-control">
-          <span class="sr-only">Language</span>
-          <select id="languageSelect" aria-label="Select language">
-            <option value="en">English</option>
-            <option value="hi">हिन्दी</option>
-            <option value="te">తెలుగు</option>
-            <option value="ta">தமிழ்</option>
-            <option value="bn">বাংলা</option>
-            <option value="mr">मराठी</option>
-            <option value="gu">ગુજરાતી</option>
-            <option value="kn">ಕನ್ನಡ</option>
-            <option value="ml">മലയാളം</option>
-            <option value="or">ଓଡ଼ିଆ</option>
-            <option value="pa">ਪੰਜਾਬੀ</option>
-            <option value="as">অসমীয়া</option>
-            <option value="ur">اردو</option>
-          </select>
-        </label>
-      </div>
-    </div>
-  </header>
+<section id="login" class="page hidden login"><div class="hero"><h2>Secure Portal Login</h2><p id="loginSub">Sign in to access authorised services.</p></div><div class="card">
+<label>Account type</label><select id="loginRole"><option value="user">User / Citizen</option><option value="admin">Administrator</option></select>
+<label>User ID</label><input id="uid" autocomplete="username" placeholder="Enter user ID">
+<label>Password</label><input id="pwd" type="password" autocomplete="current-password" placeholder="Enter password">
+<div class="actions"><button class="btn primary" onclick="login()">Sign in</button><button class="btn outline" onclick="show('home')">Cancel</button></div>
+<div class="notice warning" style="margin-top:16px">Authentication is enforced by the connected backend. This screen never stores database credentials.</div>
+</div></section>
 
-  <nav class="primary-nav">
-    <div class="shell nav-inner">
-      <button class="nav-link active" data-nav="registration" type="button">Property Registration</button>
-      <button class="nav-link" data-nav="records" type="button">3D Property Records</button>
-      <button class="nav-link" data-nav="help" type="button">Help & Guidelines</button>
-    </div>
-  </nav>
+<section id="lookup" class="page hidden"><div class="crumb">Home / Property Search</div><div class="hero"><h2>Search 3D Property Record</h2><p>Enter the 3D ULPIN supplied by the land-record authority.</p></div>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 12345678901234-F03-V-PRV-A301-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
+<div class="card half"><div class="sectionline"></div><h3>Access Notice</h3><p style="color:var(--muted);line-height:1.6">Only property information authorised for the signed-in account is returned. Restricted utility and ownership information remains access-controlled.</p></div></div>
+<div id="result" class="grid hidden"></div></section>
 
-  <main class="shell main">
-    <div class="breadcrumb"><span>Home</span><span>›</span><strong>Property Registration</strong></div>
+<section id="admin" class="page hidden"><div class="crumb">Home / Administration</div><div class="hero"><h2>Property Record Administration</h2><p>Create or update spatial property records. Final authorisation and database writes are performed by the backend.</p></div>
+<div id="adminGate" class="card"><div class="notice warning">Administrator authentication is required before editing records.</div><div class="actions"><button class="btn secondary" onclick="show('login');setRole('admin')">Administrator Login</button></div></div>
+<div id="adminPanel" class="grid hidden"><div class="card"><div class="sectionline"></div><h3>Register / Update Property</h3>
+<div class="row"><div><label>Operation</label><select id="op" onchange="toggleUpdate()"><option value="create">Create new record</option><option value="update">Update existing record</option></select></div><div id="updateIdWrap" class="hidden"><label>Existing 3D ULPIN to update</label><input id="updateId" placeholder="Paste existing generated 3D ULPIN"></div></div>
+<div class="row"><div><label>Parent 2D ULPIN</label><input id="parent" maxlength="14" placeholder="14-character parent ULPIN"></div><div><label>Rights / Use Code</label><select id="rights"><option value="PRV">PRV — Private</option><option value="COM">COM — Common</option><option value="UTL">UTL — Utility</option><option value="CML">CML — Commercial</option></select></div></div>
+<div class="row"><div><label>Unit ID</label><input id="unit" placeholder="A301 / PRK01 / H001"></div><div><label>Property / Unit Name</label><input id="pname" placeholder="Apartment / Shop / Office"></div><div><label>Space Class</label><select id="space"><option>Vertical / Building</option><option>Common / Shared</option><option>Underground</option><option>Elevated / Air-right</option></select></div></div>
+<div class="row"><div><label>Floor / Z-level</label><input id="floor" placeholder="F03 / B01 / G00 / R00"></div><div><label>Area (m²)</label><input id="area" type="number" step="0.1" placeholder="112.6"></div></div>
+<label>Location / Address</label><textarea id="addr" placeholder="Municipality, district, state"></textarea>
+<label>Blueprint / source document</label><input id="blueprint" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.dwg,.dxf">
+<div id="generated" class="notice" style="margin-top:16px"><strong>Generated 3D ULPIN:</strong> <span id="generatedId">Will be generated after submission</span></div><div class="actions"><button class="btn success" onclick="saveProperty()">Save / Submit</button><button class="btn outline" onclick="resetAdmin()">Reset</button></div></div>
+<div class="card"><div class="sectionline"></div><h3>Record Governance</h3><div class="kv"><div>Geometry</div><div>3D solid / surface + elevation range</div><div>Rights</div><div>Linked separately to the spatial object</div><div>Validation</div><div>Topology and geometry status</div><div>Version</div><div>Incremented by the backend on approved change</div></div></div></div>
+</section>
 
-    <section class="hero">
-      <div class="hero-copy">
-        <div class="section-kicker">PROPERTY SERVICES</div>
-        <h1>Convert a 2D land record into a <em>3D property record</em></h1>
-        <p>Submit the existing 2D ULPIN, property details and blueprint. Your authorised backend processes the submission and returns the 3D ULPIN, model and property record.</p>
-        <div class="hero-points">
-          <span><b>01</b> Existing 2D ULPIN</span>
-          <span><b>02</b> Property details</span>
-          <span><b>03</b> Blueprint</span>
-        </div>
-      </div>
-      <div class="hero-process" aria-label="Submission process">
-        <div class="process-title">PROCESS</div>
-        <div class="process-step current"><span>1</span><div><strong>Submit</strong><small>Property + blueprint</small></div></div>
-        <div class="process-line"></div>
-        <div class="process-step"><span>2</span><div><strong>Process</strong><small>Backend validation</small></div></div>
-        <div class="process-line"></div>
-        <div class="process-step"><span>3</span><div><strong>Receive</strong><small>3D property record</small></div></div>
-      </div>
-    </section>
+<section id="about" class="page hidden"><div class="crumb">Home / About</div><div class="hero"><h2>About the 3D ULPIN Extension</h2><p>The prototype retains the parent ULPIN as the base parcel identity and represents vertical, underground, elevated and air-right spaces as distinct 3D cadastral objects.</p></div>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Illustrative 3D Identifier</h3><p><strong>12345678901234-F03-V-PRV-A301-V01</strong></p><p style="color:var(--muted)">Parent ULPIN • Z-Level • Space Class • Rights/Use • Unit • Version</p></div><div class="card half"><div class="sectionline"></div><h3>Interoperability</h3><p>Designed for API-based integration and geospatial exchange including GeoJSON, CityGML/3D city models, IFC/BIM, LAS/LAZ and 3D Tiles.</p></div></div></section>
+</main>
+<footer class="footer"><div class="footerin"><strong>V-CAD — 3D ULPIN Generation & Vertical Property Mapping</strong><br>Smart India Hackathon prototype • Spatial records are subject to authorised verification and publication.</div></footer>
+<div id="modal" class="modal hidden"><div class="modalbox"><div class="warnicon">⚠</div><h3 id="modalTitle">Warning</h3><p id="modalText"></p><div class="actions"><button class="btn primary" onclick="closeModal()">OK</button></div></div></div>
+<script>
+window.APP_CONFIG={API_BASE:"http://localhost:8000/api"};
+let mode="deploy",role=null,token=null;
+const mock={
+"12345678901234-F03-V-PRV-A301-V01":{threeDULPIN:"12345678901234-F03-V-PRV-A301-V01",parentULPIN:"12345678901234",name:"Apartment 301",space:"Vertical / Building",floor:"F03",area:"112.6",address:"Varanasi, Uttar Pradesh",lat:25.3176,lon:82.9739,status:"Approved / Published",validation:"PASS — geometry valid",rights:"Private",version:"V01"}
+};
+function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==="admin")refreshAdmin()}
+function setRole(r){document.getElementById('loginRole').value=r}
+function warn(t,m){document.getElementById('modalTitle').textContent=t;document.getElementById('modalText').textContent=m;document.getElementById('modal').classList.remove('hidden')}
+function closeModal(){document.getElementById('modal').classList.add('hidden')}
+function login(){
+ const r=document.getElementById('loginRole').value, u=document.getElementById('uid').value.trim(),p=document.getElementById('pwd').value;
+ if(!u||!p)return warn("Sign-in required","Please enter your User ID and password.");
+ if(mode==="test" || true){role=r;token="demo-token";sessionStorage.setItem("ulpin_role",role);updateRole();show(r==="admin"?"admin":"lookup")}
+}
+function updateRole(){document.getElementById('roleBadge').textContent=role==="admin"?"Administrator":"User";document.getElementById('logout').classList.remove('hidden')}
+function logout(){role=null;token=null;sessionStorage.clear();document.getElementById('roleBadge').textContent="Not signed in";document.getElementById('logout').classList.add('hidden');show('home')}
+function getVal(id){return document.getElementById(id)?.value?.trim()||""}
+function make3DULPIN(){
+ const parent=getVal('parent'), z=getVal('floor'), spaceCode=({"Vertical / Building":"V","Common / Shared":"S","Underground":"U","Elevated / Air-right":"E"})[getVal('space')]||'V';
+ const rights=getVal('rights')||'PRV', unit=getVal('unit')||'UNIT', version='V01';
+ if(!/^\d{14}$/.test(parent)) throw Error('Parent 2D ULPIN must contain exactly 14 digits.');
+ if(!/^(F\d{2}|B\d{2}|G\d{2}|R\d{2})$/i.test(z)) throw Error('Floor / Z-level must look like F03, B01, G00 or R00.');
+ if(!/^[A-Za-z0-9_-]{1,16}$/.test(unit)) throw Error('Unit ID may contain letters, numbers, _ or - only.');
+ return `${parent}-${z.toUpperCase()}-${spaceCode}-${rights}-${unit.toUpperCase()}-${version}`;
+}
+function toggleUpdate(){document.getElementById('updateIdWrap').classList.toggle('hidden',getVal('op')!=='update')}
+function lookupProperty(){
+ const id=getVal('searchId');if(!id)return warn('Missing 3D ULPIN','Enter a 3D ULPIN before searching.');
+ if(mode==='test'){
+   const local=localStorage.getItem('test_property_'+id);
+   const d=local?JSON.parse(local):(mock[id]||mock['12345678901234-F03-V-PRV-A301-V01']);
+   return renderResult({...d,threeDULPIN:d.threeDULPIN||id},false);
+ }
+ fetch(window.APP_CONFIG.API_BASE+'/properties/'+encodeURIComponent(id),{headers:token?{Authorization:'Bearer '+token}:{}}).then(async r=>{if(!r.ok)throw Error();return r.json()}).then(d=>renderResult(d,false)).catch(()=>renderResult({threeDULPIN:id,parentULPIN:'—',name:'Property record received',space:'—',floor:'—',area:'—',address:'—',status:'Failed to load',validation:'Failed to load',rights:'Authorised details unavailable',version:'—'},true));
+}
+function renderResult(d,failed){
+ const r=document.getElementById('result');r.classList.remove('hidden');
+ r.innerHTML=`<div class="card half"><div class="sectionline"></div><h3>Property Details</h3><div class="kv"><div>3D ULPIN</div><div>${d.threeDULPIN||'—'}</div><div>Parent ULPIN</div><div>${d.parentULPIN||'—'}</div><div>Property</div><div>${d.name||'—'}</div><div>Space class</div><div>${d.space||'—'}</div><div>Floor / Z-level</div><div>${d.floor||'—'}</div><div>Area</div><div>${d.area||'—'} m²</div><div>Status</div><div>${d.status||'—'}</div><div>Validation</div><div>${d.validation||'—'}</div></div></div>
+ <div class="card half"><div class="sectionline"></div><h3>Location</h3><div class="map"><div class="pin">📍</div></div><p><strong>${d.address||'Location unavailable'}</strong></p><div class="actions"><button class="btn outline" onclick="openMap(${d.lat||0},${d.lon||0})">Get Location</button></div></div>
+ <div class="card third"><div class="sectionline"></div><h3>Blueprint</h3><div class="asset"><div><div class="icon">▧</div><strong class="${failed?'failed':''}">${failed?'Failed to load':'Blueprint available'}</strong><br><small>Source document</small></div></div></div>
+ <div class="card third"><div class="sectionline"></div><h3>3D Model</h3><div class="asset"><div><div class="icon">◇</div><strong class="${failed?'failed':''}">${failed?'Failed to load':'3D model available'}</strong><br><small>3D Tiles / model endpoint</small></div></div></div>
+ <div class="card third"><div class="sectionline"></div><h3>Rights & Version</h3><div class="kv"><div>Rights</div><div>${d.rights||'—'}</div><div>Version</div><div>${d.version||'—'}</div></div></div>`;
+}
+function openMap(lat,lon){if(!lat&&!lon)return warn('Location unavailable','The backend did not return coordinates for this property.');window.open('https://www.google.com/maps?q='+lat+','+lon,'_blank')}
+function refreshAdmin(){const ok=role==='admin';document.getElementById('adminGate').classList.toggle('hidden',ok);document.getElementById('adminPanel').classList.toggle('hidden',!ok)}
+function saveProperty(){
+ if(role!=='admin')return warn('Access denied','Administrator authentication is required.');
+ let threeD;try{threeD=make3DULPIN()}catch(e){return warn('Invalid record',e.message)}
+ const file=document.getElementById('blueprint').files[0];
+ if(file && file.size>25*1024*1024)return warn('File too large','Blueprint files must be 25 MB or smaller.');
+ const data={parentULPIN:getVal('parent'),threeDULPIN:threeD,name:getVal('pname'),space:getVal('space'),floor:getVal('floor'),rights:getVal('rights'),unitId:getVal('unit'),area:getVal('area'),address:getVal('addr'),blueprintName:file?.name||null};
+ if(!data.name)return warn('Incomplete record','Property / Unit Name is required.');
+ document.getElementById('generatedId').textContent=threeD;
+ if(mode==='test'){localStorage.setItem('test_property_'+threeD,JSON.stringify({...data,status:'Approved / Published',validation:'PASS — geometry valid',version:'V01',lat:25.3176,lon:82.9739}));warn('Test record saved','3D ULPIN generated successfully: '+threeD);return}
+ const op=getVal('op');const endpoint=op==='update'?window.APP_CONFIG.API_BASE+'/properties/'+encodeURIComponent(getVal('updateId')):window.APP_CONFIG.API_BASE+'/properties';
+ const method=op==='update'?'PUT':'POST';
+ fetch(endpoint,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(data)}).then(async r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{if(d.threeDULPIN)document.getElementById('generatedId').textContent=d.threeDULPIN;warn('Record submitted','The backend accepted the property record. Generated 3D ULPIN: '+(d.threeDULPIN||threeD))}).catch(()=>warn('Failed to save','The backend could not be reached or rejected the request. No local database write was attempted.'))
+}
+function resetAdmin(){document.querySelectorAll('#adminPanel input,#adminPanel textarea').forEach(x=>x.value='');document.getElementById('generatedId').textContent='Will be generated after submission';toggleUpdate()}
 
-    <div id="message" class="inline-message hidden" role="status"></div>
+const translations={
+ en:{'Home':'Home','Property Search':'Property Search','Administration':'Administration','About 3D ULPIN':'About 3D ULPIN','Sign out':'Sign out','Not signed in':'Not signed in','Search Property':'Search Property','Administrator Login':'Administrator Login','Secure Portal Login':'Secure Portal Login','Sign in':'Sign in','Cancel':'Cancel','User ID':'User ID','Password':'Password','Account type':'Account type','User / Citizen':'User / Citizen','Administrator':'Administrator','Citizen / User Services':'Citizen / User Services','Register / Update Property':'Register / Update Property','Create new record':'Create new record','Update existing record':'Update existing record','Parent 2D ULPIN':'Parent 2D ULPIN','Rights / Use Code':'Rights / Use Code','Unit ID':'Unit ID','Property / Unit Name':'Property / Unit Name','Space Class':'Space Class','Floor / Z-level':'Floor / Z-level','Area (m²)':'Area (m²)','Location / Address':'Location / Address','Blueprint / source document':'Blueprint / source document','Save / Submit':'Save / Submit','Reset':'Reset','Generated 3D ULPIN:':'Generated 3D ULPIN:','Search 3D Property Record':'Search 3D Property Record','Fetch Property':'Fetch Property','Clear':'Clear','Property Details':'Property Details','Location':'Location','Blueprint':'Blueprint','3D Model':'3D Model','Rights & Version':'Rights & Version','Get Location':'Get Location','Record Governance':'Record Governance'},
+ hi:{'Home':'मुख्य पृष्ठ','Property Search':'संपत्ति खोज','Administration':'प्रशासन','About 3D ULPIN':'3D ULPIN के बारे बारे में','Sign out':'साइन आउट','Not signed in':'साइन इन नहीं है','Search Property':'संपत्ति खोजें','Administrator Login':'प्रशासक लॉगिन','Secure Portal Login':'सुरक्षित पोर्टल लॉगिन','Sign in':'साइन इन','Cancel':'रद्द करें','User ID':'उपयोगकर्ता आईडी','Password':'पासवर्ड','Account type':'खाता प्रकार','User / Citizen':'उपयोगकर्ता / नागरिक','Administrator':'प्रशासक','Citizen / User Services':'नागरिक / उपयोगकर्ता सेवाएँ','Register / Update Property':'संपत्ति पंजीकरण / अपडेट','Create new record':'नया रिकॉर्ड बनाएँ','Update existing record':'मौजूदा रिकॉर्ड अपडेट करें','Parent 2D ULPIN':'मूल 2D ULPIN','Rights / Use Code':'अधिकार / उपयोग कोड','Unit ID':'इकाई आईडी','Property / Unit Name':'संपत्ति / इकाई का नाम','Space Class':'स्थान वर्ग','Floor / Z-level':'मंज़िल / Z-स्तर','Area (m²)':'क्षेत्रफल (m²)','Location / Address':'स्थान / पता','Blueprint / source document':'ब्लूप्रिंट / स्रोत दस्तावेज़','Save / Submit':'सहेजें / जमा करें','Reset':'रीसेट','Generated 3D ULPIN:':'निर्मित 3D ULPIN:','Search 3D Property Record':'3D संपत्ति रिकॉर्ड खोजें','Fetch Property':'संपत्ति प्राप्त करें','Clear':'साफ़ करें','Property Details':'संपत्ति विवरण','Location':'स्थान','Blueprint':'ब्लूप्रिंट','3D Model':'3D मॉडल','Rights & Version':'अधिकार और संस्करण','Get Location':'स्थान प्राप्त करें','Record Governance':'रिकॉर्ड प्रशासन'},
+ te:{'Home':'హోమ్','Property Search':'ఆస్తి శోధన','Administration':'పరిపాలన','About 3D ULPIN':'3D ULPIN గురించి','Sign out':'సైన్ అవుట్','Not signed in':'సైన్ ఇన్ కాలేదు','Search Property':'ఆస్తిని శోధించండి','Administrator Login':'నిర్వాహక లాగిన్','Secure Portal Login':'సురక్షిత పోర్టల్ లాగిన్','Sign in':'సైన్ ఇన్','Cancel':'రద్దు','User ID':'వినియోగదారు ID','Password':'పాస్‌వర్డ్','Account type':'ఖాతా రకం','User / Citizen':'వినియోగదారు / పౌరుడు','Administrator':'నిర్వాహకుడు','Citizen / User Services':'పౌర / వినియోగదారు సేవలు','Register / Update Property':'ఆస్తి నమోదు / నవీకరణ','Create new record':'కొత్త రికార్డు సృష్టించండి','Update existing record':'ఉన్న రికార్డును నవీకరించండి','Parent 2D ULPIN':'మాతృ 2D ULPIN','Rights / Use Code':'హక్కులు / వినియోగ కోడ్','Unit ID':'యూనిట్ ID','Property / Unit Name':'ఆస్తి / యూనిట్ పేరు','Space Class':'స్థల వర్గం','Floor / Z-level':'అంతస్తు / Z-స్థాయి','Area (m²)':'విస్తీర్ణం (m²)','Location / Address':'స్థానం / చిరునామా','Blueprint / source document':'బ్లూప్రింట్ / మూల పత్రం','Save / Submit':'సేవ్ / సమర్పించండి','Reset':'రీసెట్','Generated 3D ULPIN:':'రూపొందించిన 3D ULPIN:','Search 3D Property Record':'3D ఆస్తి రికార్డు శోధన','Fetch Property':'ఆస్తి పొందండి','Clear':'క్లియర్','Property Details':'ఆస్తి వివరాలు','Location':'స్థానం','Blueprint':'బ్లూప్రింట్','3D Model':'3D మోడల్','Rights & Version':'హక్కులు & వెర్షన్','Get Location':'స్థానం పొందండి','Record Governance':'రికార్డు నిర్వహణ'},
+ ta:{'Home':'முகப்பு','Property Search':'சொத்து தேடல்','Administration':'நிர்வாகம்','About 3D ULPIN':'3D ULPIN பற்றி','Sign out':'வெளியேறு','Not signed in':'உள்நுழையவில்லை','Search Property':'சொத்தை தேடு','Administrator Login':'நிர்வாகி உள்நுழைவு','Secure Portal Login':'பாதுகாப்பான உள்நுழைவு','Sign in':'உள்நுழை','Cancel':'ரத்து','User ID':'பயனர் ID','Password':'கடவுச்சொல்','Account type':'கணக்கு வகை','User / Citizen':'பயனர் / குடிமகன்','Administrator':'நிர்வாகி','Citizen / User Services':'குடிமகன் / பயனர் சேவைகள்','Register / Update Property':'சொத்து பதிவு / புதுப்பிப்பு','Create new record':'புதிய பதிவு உருவாக்கு','Update existing record':'ஏற்கனவே உள்ள பதிவை புதுப்பி','Parent 2D ULPIN':'மூல 2D ULPIN','Rights / Use Code':'உரிமை / பயன்பாட்டு குறியீடு','Unit ID':'அலகு ID','Property / Unit Name':'சொத்து / அலகு பெயர்','Space Class':'இட வகை','Floor / Z-level':'தளம் / Z-நிலை','Area (m²)':'பரப்பளவு (m²)','Location / Address':'இடம் / முகவரி','Blueprint / source document':'வரைபடம் / மூல ஆவணம்','Save / Submit':'சேமி / சமர்ப்பி','Reset':'மீட்டமை','Generated 3D ULPIN:':'உருவாக்கப்பட்ட 3D ULPIN:','Search 3D Property Record':'3D சொத்து பதிவை தேடு','Fetch Property':'சொத்தை பெறு','Clear':'அழி','Property Details':'சொத்து விவரங்கள்','Location':'இடம்','Blueprint':'வரைபடம்','3D Model':'3D மாதிரி','Rights & Version':'உரிமைகள் & பதிப்பு','Get Location':'இடத்தை பெறு','Record Governance':'பதிவு நிர்வாகம்'},
+ bn:{'Home':'হোম','Property Search':'সম্পত্তি অনুসন্ধান','Administration':'প্রশাসন','About 3D ULPIN':'3D ULPIN সম্পর্কে','Sign out':'সাইন আউট','Search Property':'সম্পত্তি খুঁজুন','Administrator Login':'প্রশাসক লগইন','Sign in':'সাইন ইন','Cancel':'বাতিল','User ID':'ব্যবহারকারী আইডি','Password':'পাসওয়ার্ড','Account type':'অ্যাকাউন্টের ধরন','User / Citizen':'ব্যবহারকারী / নাগরিক','Administrator':'প্রশাসক','Register / Update Property':'সম্পত্তি নিবন্ধন / আপডেট','Create new record':'নতুন রেকর্ড তৈরি করুন','Update existing record':'বিদ্যমান রেকর্ড আপডেট করুন','Parent 2D ULPIN':'মূল 2D ULPIN','Rights / Use Code':'অধিকার / ব্যবহার কোড','Unit ID':'ইউনিট ID','Property / Unit Name':'সম্পত্তি / ইউনিটের নাম','Space Class':'স্থান শ্রেণি','Floor / Z-level':'তলা / Z-স্তর','Area (m²)':'এলাকা (m²)','Location / Address':'অবস্থান / ঠিকানা','Blueprint / source document':'ব্লুপ্রিন্ট / উৎস নথি','Save / Submit':'সংরক্ষণ / জমা','Reset':'রিসেট','Generated 3D ULPIN:':'তৈরি 3D ULPIN:','Search 3D Property Record':'3D সম্পত্তি রেকর্ড খুঁজুন','Fetch Property':'সম্পত্তি আনুন','Clear':'পরিষ্কার','Property Details':'সম্পত্তির বিবরণ','Location':'অবস্থান','Blueprint':'ব্লুপ্রিন্ট','3D Model':'3D মডেল','Rights & Version':'অধিকার ও সংস্করণ','Get Location':'অবস্থান পান','Record Governance':'রেকর্ড পরিচালনা'}
+};
+['as','brx','doi','gu','kn','ks','kok','mai','ml','mni','mr','ne','or','pa','sa','sat','sd','ur'].forEach(c=>translations[c]=translations.en);
+translations.mr={...translations.hi};
+function applyLanguage(code){
+ localStorage.setItem('ulpin_lang',code);document.documentElement.lang=code;document.documentElement.dir=code==='ur'?'rtl':'ltr';
+ const tr=translations[code]||translations.en;
+ document.querySelectorAll('body *').forEach(el=>{if(el.children.length===0 && el.textContent.trim() && tr[el.textContent.trim()])el.textContent=tr[el.textContent.trim()]});
+ document.querySelectorAll('input,textarea').forEach(el=>{if(el.placeholder){const key=el.placeholder; if(tr[key])el.placeholder=tr[key]}});
+}
 
-    <section class="card submission-card">
-      <div class="card-header">
-        <div>
-          <div class="card-number">01</div>
-          <div>
-            <h2>Property submission</h2>
-            <p>Enter information exactly as available in the land/property record.</p>
-          </div>
-        </div>
-        <span class="required"><i>*</i> Required fields</span>
-      </div>
-
-      <form id="propertyForm" novalidate>
-        <section class="form-block">
-          <div class="block-heading">
-            <span class="block-icon">ID</span>
-            <div><h3>Existing land identity</h3><p>The parent parcel's existing 2D identifier.</p></div>
-          </div>
-          <div class="field full">
-            <label for="ulpin">2D ULPIN <i>*</i></label>
-            <div class="input-with-badge">
-              <input id="ulpin" name="ulpin" type="text" maxlength="32" autocomplete="off" placeholder="Enter existing 2D ULPIN" required>
-              <span>LAND PARCEL</span>
-            </div>
-            <small>Use the ULPIN already issued for the parent land parcel.</small>
-          </div>
-        </section>
-
-        <section class="form-block">
-          <div class="block-heading">
-            <span class="block-icon">02</span>
-            <div><h3>Property details</h3><p>Basic details used to identify the property.</p></div>
-          </div>
-
-          <div class="grid two">
-            <div class="field">
-              <label for="propertyName">Property / Building name <i>*</i></label>
-              <input id="propertyName" name="propertyName" type="text" placeholder="e.g. Green Heights" required>
-            </div>
-            <div class="field">
-              <label for="propertyType">Property type <i>*</i></label>
-              <select id="propertyType" name="propertyType" required>
-                <option value="">Select property type</option>
-                <option>Residential Building</option><option>Commercial Building</option>
-                <option>Mixed Use</option><option>Apartment Complex</option>
-                <option>Institutional</option><option>Independent House</option><option>Other</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid three">
-            <div class="field"><label for="state">State / UT <i>*</i></label><input id="state" name="state" type="text" placeholder="e.g. Telangana" required></div>
-            <div class="field"><label for="district">District <i>*</i></label><input id="district" name="district" type="text" placeholder="e.g. Hyderabad" required></div>
-            <div class="field"><label for="locality">Village / Ward / Locality</label><input id="locality" name="locality" type="text" placeholder="Enter locality"></div>
-          </div>
-
-          <div class="grid three">
-            <div class="field"><label for="surveyNumber">Survey / Plot No.</label><input id="surveyNumber" name="surveyNumber" type="text" placeholder="e.g. 125/3A"></div>
-            <div class="field"><label for="floors">Number of floors</label><input id="floors" name="floors" type="number" min="0" max="200" placeholder="e.g. 5"></div>
-            <div class="field"><label for="area">Parcel area (m²)</label><input id="area" name="area" type="number" min="0" step="0.01" placeholder="e.g. 850"></div>
-          </div>
-
-          <div class="field full"><label for="address">Property address <i>*</i></label><textarea id="address" name="address" rows="3" placeholder="Complete property address" required></textarea></div>
-        </section>
-
-        <section class="form-block blueprint-block">
-          <div class="block-heading">
-            <span class="block-icon">03</span>
-            <div><h3>Blueprint / building plan</h3><p>Upload the available plan for processing and 3D model generation.</p></div>
-          </div>
-
-          <div id="dropzone" class="upload-zone" tabindex="0" role="button" aria-label="Upload blueprint">
-            <input id="blueprint" name="blueprint" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff,.dwg,.dxf" hidden>
-            <div class="upload-illustration" aria-hidden="true">
-              <div class="paper"><span>+</span></div>
-              <div class="upload-arrow">↑</div>
-            </div>
-            <div class="upload-copy">
-              <strong>Drop your blueprint here</strong>
-              <span>or <button id="browseBtn" type="button" class="text-button">browse files</button></span>
-              <small>PDF, PNG, JPG, JPEG, WEBP, TIFF, DWG or DXF · up to 25 MB</small>
-            </div>
-          </div>
-          <div id="filePreview" class="file-preview hidden"></div>
-        </section>
-
-        <section class="form-footer">
-          <label class="consent"><input id="confirm" name="confirm" type="checkbox" required><span>I confirm that the information provided corresponds to the submitted property record and blueprint.</span></label>
-          <div class="actions">
-            <button class="secondary-button" type="button" id="resetBtn">Clear form</button>
-            <button class="primary-button" type="submit" id="submitBtn"><span>Submit for 3D processing</span><b>→</b></button>
-          </div>
-        </section>
-      </form>
-    </section>
-
-    <section id="resultSection" class="card result-card hidden">
-      <div class="result-header">
-        <div class="result-status"><span>✓</span> RECORD RECEIVED</div>
-        <h2>3D property record</h2>
-        <p>Assets returned by the backend are shown below.</p>
-      </div>
-
-      <div class="result-id-row">
-        <div><span>3D ULPIN</span><strong id="resultUlpIn">—</strong></div>
-        <button id="copyId" type="button">Copy</button>
-      </div>
-
-      <div class="result-layout">
-        <div class="result-details-panel">
-          <div class="panel-title">PROPERTY DETAILS</div>
-          <div id="resultDetails" class="details-grid"></div>
-        </div>
-        <div class="asset-panel">
-          <div class="panel-title">BLUEPRINT</div>
-          <div class="asset-frame">
-            <img id="resultBlueprintImage" class="blueprint-image hidden" alt="Returned blueprint">
-            <iframe id="resultBlueprintPdf" class="blueprint-pdf hidden" title="Returned blueprint PDF"></iframe>
-            <div id="blueprintFallback" class="asset-empty"><span class="asset-icon">▧</span><strong>Blueprint returned by backend</strong><small>No preview URL was provided.</small></div>
-          </div>
-          <a id="blueprintLink" class="asset-link hidden" target="_blank" rel="noopener">Open blueprint ↗</a>
-        </div>
-        <div class="asset-panel model-panel">
-          <div class="panel-title">3D MODEL</div>
-          <div class="model-frame">
-            <model-viewer id="modelViewer" class="hidden" camera-controls auto-rotate shadow-intensity="1" exposure="1" alt="Returned 3D model"></model-viewer>
-            <div id="modelFallback" class="asset-empty"><span class="asset-icon cube">◇</span><strong>3D model</strong><small>The generated model from the backend will appear here.</small></div>
-          </div>
-          <a id="modelLink" class="asset-link hidden" target="_blank" rel="noopener">Open 3D model ↗</a>
-        </div>
-      </div>
-
-      <div class="result-footer"><span><b>Status:</b> Successfully received from backend</span><button id="newSubmission" class="secondary-button" type="button">Create another submission</button></div>
-    </section>
-
-    <section id="cityMapSection" class="card hidden" style="height: 600px; padding: 0; overflow: hidden; margin-top: 18px;">
-      <div id="cesiumContainer" style="width: 100%; height: 100%;"></div>
-    </section>
-
-    <div class="prototype-note"><span>i</span><div><strong>Frontend / backend boundary</strong><p>This interface does not generate the 3D ULPIN or model. It sends the form as <code>multipart/form-data</code> to the configured API and renders the response. The API contract is configurable in <code>config.js</code>.</p></div></div>
-  </main>
-
-  <div id="helpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-    <div class="modal-backdrop" data-close="helpModal"></div>
-    <div class="modal-card">
-      <div class="modal-icon info">i</div><div class="modal-body"><h2 id="helpTitle">Help & Guidelines</h2><p>Enter the existing 2D ULPIN, property details and blueprint. The frontend forwards these fields to your backend. The backend should return a 3D ULPIN and asset URLs.</p><button class="primary-button" type="button" data-close="helpModal">OK</button></div>
-    </div>
-  </div>
-
-  <div id="errorModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="warningTitle">
-    <div class="modal-backdrop" data-close="errorModal"></div>
-    <div class="modal-card warning"><div class="modal-icon warning">!</div><div class="modal-body"><h2 id="warningTitle">Warning</h2><p id="modalText"></p><button id="modalClose" class="primary-button" type="button">OK</button></div></div>
-  </div>
-
-  <footer class="site-footer"><div class="shell"><span>3D ULPIN Prototype</span><span>Digital Land Records · Frontend only</span></div></footer>
-</body>
-</html>
+function boot(){document.getElementById('lang').addEventListener('change',e=>applyLanguage(e.target.value));const saved=localStorage.getItem('ulpin_lang')||'en';document.getElementById('lang').value=saved;applyLanguage(saved);document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>show(b.dataset.page));document.getElementById('logout').onclick=logout;const rr=sessionStorage.getItem("ulpin_role");if(rr){role=rr;updateRole()}show('home')}
+boot();
+</script>
+</body></html>
