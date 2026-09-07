@@ -4,17 +4,16 @@ from pathlib import Path
 
 st.set_page_config(layout="wide", page_title="V-CAD | 3D ULPIN")
 
-# Hide Streamlit's default padding to make the UI full-screen
 st.markdown("""
     <style>
         header {visibility: hidden;}
         footer {visibility: hidden;}
         .block-container {
-            padding-top: 0rem;
-            padding-bottom: 0rem;
-            padding-left: 0rem;
-            padding-right: 0rem;
-            max-width: 100%;
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+            padding-left: 0rem !important;
+            padding-right: 0rem !important;
+            max-width: 100% !important;
         }
         iframe {
             display: block;
@@ -25,15 +24,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Get the directory of this python file
 base_dir = Path(__file__).parent
+html_content = (base_dir / "index.html").read_text(encoding="utf-8")
+config_content = (base_dir / "config.js").read_text(encoding="utf-8")
 
-# Read the teammate's new consolidated HTML and config files
-html = (base_dir / "index.html").read_text(encoding="utf-8")
-config = (base_dir / "config.js").read_text(encoding="utf-8")
+html_content = html_content.replace('<script src="config.js"></script>', f'<script>{config_content}</script>')
 
-# Inject config.js directly into the HTML
-html = html.replace('<script src="config.js"></script>', f'<script>{config}</script>')
-
-# Render the frontend
-components.html(html, height=1200, scrolling=True)
+components.html(html_content, height=1200, scrolling=True)
