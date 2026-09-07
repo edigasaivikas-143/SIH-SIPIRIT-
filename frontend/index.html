@@ -77,7 +77,7 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 </div></section>
 
 <section id="lookup" class="page hidden"><div class="crumb">Home / Property Search</div><div class="hero"><h2>Search 3D Property Record</h2><p>Enter the 3D ULPIN supplied by the land-record authority.</p></div>
-<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 12345678912345-F03-V-PRV-A301-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
+<div class="grid"><div class="card half"><div class="sectionline"></div><h3>Property Identifier</h3><label>3D ULPIN</label><input id="searchId" placeholder="e.g. 12345678901234-F03-V-PRV-A301-V01"><div class="actions"><button class="btn primary" onclick="lookupProperty()">Fetch Property</button><button class="btn outline" onclick="document.getElementById('searchId').value=''">Clear</button></div></div>
 <div class="card half"><div class="sectionline"></div><h3>Access Notice</h3><p style="color:var(--muted);line-height:1.6">Only property information authorised for the signed-in account is returned. Restricted utility and ownership information remains access-controlled.</p></div></div>
 <div id="result" class="grid hidden"></div></section>
 
@@ -170,9 +170,38 @@ function updateLiveULPIN(){
  document.getElementById('generatedId').textContent = constructed;
 }
 
+function parseDynamicULPIN(id) {
+  const parts = id.split('-');
+  const parentId = parts[0] && parts[0].length === 14 ? parts[0] : (id.length >= 14 ? id.substring(0, 14) : "12345678901234");
+  const floorLvl = parts[1] || "F01";
+  const spaceClass = parts[2] || "V";
+  const rightsCode = parts[3] || "PRV";
+  const unitId = parts[4] || "012";
+  const versionId = parts[5] || "V01";
+
+  const spaceMap = { "V": "Vertical / Building", "S": "Surface / Common", "U": "Underground", "E": "Elevated / Air-right" };
+  const rightsMap = { "PRV": "Private", "COM": "Common", "UTL": "Utility", "CML": "Commercial" };
+
+  return {
+    threeDULPIN: id,
+    parentULPIN: parentId,
+    name: `Unit ${unitId}`,
+    space: spaceMap[spaceClass] || "Vertical / Building",
+    floor: floorLvl,
+    area: (Math.random() * 50 + 60).toFixed(1),
+    address: "Amaravathi, Andhra Pradesh, India",
+    lat: 16.5062,
+    lon: 80.5214,
+    status: "Approved / Published",
+    validation: "PASS — Geometry & Topology Valid",
+    rights: rightsMap[rightsCode] || "Private",
+    version: versionId
+  };
+}
+
 function lookupProperty(){
  const id = getVal('searchId').toUpperCase();
- if(!id) return warn('Missing 3D ULPIN','Enter a 3D ULPIN before searching.');
+ id ? void 0 : (function(){ return warn('Missing 3D ULPIN','Enter a 3D ULPIN before searching.'); })()
  
  const local = localStorage.getItem('vcad_record_' + id);
  if(local) {
@@ -185,27 +214,7 @@ function lookupProperty(){
    return renderResult(currentLoadedProperty, false);
  }
 
- const parts = id.split('-');
- const parentId = id.length >= 14 ? id.substring(0, 14) : "12345678901234";
- const floorLvl = parts[1] || "F01";
- const unitId = parts[4] || "012";
- 
- currentLoadedProperty = {
-   threeDULPIN: id,
-   parentULPIN: parentId,
-   name: `Unit ${unitId}`,
-   space: "Vertical / Building",
-   floor: floorLvl,
-   area: (Math.random() * 50 + 60).toFixed(1),
-   address: "Amaravathi, Andhra Pradesh, India",
-   lat: 16.5062,
-   lon: 80.5214,
-   status: "Approved / Published",
-   validation: "PASS — Geometry & Topology Valid",
-   rights: parts[3] === "COM" ? "Common" : "Private",
-   version: parts[5] || "V01"
- };
- 
+ currentLoadedProperty = parseDynamicULPIN(id);
  return renderResult(currentLoadedProperty, false);
 }
 
@@ -363,7 +372,7 @@ function boxMod(cx,cy,cz,w,h,d,color,object,alpha=.82){
     const pp=[[-w/2,0,-d/2],[w/2,0,-d/2],[w/2,0,d/2],[-w/2,0,d/2]].map(a=>projectMod({x:a[0]+cx,y:cy,z:a[2]+cz}));
     modCtx.beginPath();modCtx.moveTo(pp[0].x,pp[0].y);pp.slice(1).forEach(p=>modCtx.lineTo(p.x,p.y));modCtx.closePath();modCtx.fillStyle=fillColor;modCtx.fill();modCtx.strokeStyle=isSelected?'#ffd166':(isBuilding?'#aebbd6':'#34415f');modCtx.lineWidth=isSelected?2.5:1;modCtx.stroke();
   }else{
-    faces.forEach(f=>{modCtx.beginPath();modCtx.moveTo(pts[f[0]].x,pts[f[0]].y);f.slice(1).forEach(i=>modCtx.lineTo(pts[i].x,pts[i].y));modCtx.closePath();modCtx.fillStyle=fillColor;modCtx.fill();modCtx.strokeStyle=isSelected?'#ffd166':(isBuilding?'#aebbd6':'#34415f');modCtx.lineWidth=isSelected?2.5:1;modCtx.stroke()});
+    faces.forEach(f=>{modCtx.beginPath();modCtx.moveTo(pts[f[0]].x,pts[f[0]].y);f.slice(1).forEach(i=>modCtx.lineTo(pts[i].x,pts[i].y));modCtx.closePath();modCtx.fillStyle=fillColor;modCtx.fill();modCtx.strokeStyle=isSelected?'#ffd166':(isBuilding?'#aebbd6':'#34415f');modCtx.lineWidth=isSelected?2.5:1;modCtx.stroke();});
   }
   modCtx.globalAlpha=1;
 }
