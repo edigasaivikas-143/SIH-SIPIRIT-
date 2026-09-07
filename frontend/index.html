@@ -7,6 +7,8 @@
   <title>3D ULPIN | Vertical Property Mapping</title>
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="https://unpkg.com/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.107/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
 </head>
 <body>
   <div class="top-accent"></div>
@@ -213,6 +215,10 @@
       </div>
 
       <div class="result-footer"><span><b>Status:</b> Successfully received from backend</span><button id="newSubmission" class="secondary-button" type="button">Create another submission</button></div>
+    </section>
+
+    <section id="cityMapSection" class="card hidden" style="height: 600px; padding: 0; overflow: hidden; margin-top: 18px;">
+      <div id="cesiumContainer" style="width: 100%; height: 100%;"></div>
     </section>
 
     <div class="prototype-note"><span>i</span><div><strong>Frontend / backend boundary</strong><p>This interface does not generate the 3D ULPIN or model. It sends the form as <code>multipart/form-data</code> to the configured API and renders the response. The API contract is configurable in <code>config.js</code>.</p></div></div>
