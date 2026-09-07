@@ -1,4 +1,4 @@
-  """
+"""
 3D ULPIN — Streamlit demo frontend.
 
 Runs standalone: `streamlit run streamlit_app.py` — no separate FastAPI
