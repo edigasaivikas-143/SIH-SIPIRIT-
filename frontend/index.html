@@ -171,18 +171,29 @@ function updateLiveULPIN(){
 }
 
 function parseDynamicULPIN(id) {
-  const parts = id.split('-');
-  const parentId = parts[0] && parts[0].length === 14 ? parts[0] : (id.length >= 14 ? id.substring(0, 14) : "12345678901234");
-  const floorLvl = parts[1] || "F01";
-  const spaceClass = parts[2] || "V";
-  const rightsCode = parts[3] || "PRV";
-  const unitId = parts[4] || "012";
-  const versionId = parts[5] || "V01";
+  let parentId, floorLvl, spaceClass, rightsCode, unitId, versionId;
+  
+  if (id.includes('-')) {
+    const parts = id.split('-');
+    parentId = parts[0] || "12345678901234";
+    floorLvl = parts[1] || "F01";
+    spaceClass = parts[2] || "V";
+    rightsCode = parts[3] || "PRV";
+    unitId = parts[4] || "012";
+    versionId = parts[5] || "V01";
+  } else {
+    // Robust fallback parsing for unhyphenated strings (e.g., 12345678901234F03VPRVA101V01)
+    parentId = id.substring(0, 14);
+    floorLvl = id.substring(14, 17) || "F01";
+    spaceClass = id.substring(17, 18) || "V";
+    rightsCode = id.substring(18, 21) || "PRV";
+    versionId = id.slice(-3);
+    unitId = id.substring(21, id.length - 3) || "012";
+  }
 
   const spaceMap = { "V": "Vertical / Building", "S": "Surface / Common", "U": "Underground", "E": "Elevated / Air-right" };
   const rightsMap = { "PRV": "Private", "COM": "Common", "UTL": "Utility", "CML": "Commercial" };
   
-  // Dynamic parsing description for Z-Level matching the specification image
   const floorMap = {
     "F01": "Floor 1 (F01)", "F02": "Floor 2 (F02)", "F03": "Floor 3 (F03)",
     "G00": "Ground Level (G00)", "B01": "Basement (B01)", "R00": "Roof / Air-space (R00)"
