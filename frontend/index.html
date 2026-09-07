@@ -78,22 +78,27 @@ label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,selec
 <div id="modal" class="modal hidden"><div class="modalbox"><div class="warnicon">⚠</div><h3 id="modalTitle">Warning</h3><p id="modalText"></p><div class="actions"><button class="btn primary" onclick="closeModal()">OK</button></div></div></div>
 <script>
 window.APP_CONFIG={API_BASE:"http://localhost:8000/api"};
-let mode="deploy",role=null,token=null;
+let mode="test",role=null,token=null;
+
 const mock={
 "12345678901234-F03-V-PRV-A301-V01":{threeDULPIN:"12345678901234-F03-V-PRV-A301-V01",parentULPIN:"12345678901234",name:"Apartment 301",space:"Vertical / Building",floor:"F03",area:"112.6",address:"Varanasi, Uttar Pradesh",lat:25.3176,lon:82.9739,status:"Approved / Published",validation:"PASS — geometry valid",rights:"Private",version:"V01"}
 };
+
 function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===id));if(id==="admin")refreshAdmin()}
 function setRole(r){document.getElementById('loginRole').value=r}
 function warn(t,m){document.getElementById('modalTitle').textContent=t;document.getElementById('modalText').textContent=m;document.getElementById('modal').classList.remove('hidden')}
 function closeModal(){document.getElementById('modal').classList.add('hidden')}
+
 function login(){
  const r=document.getElementById('loginRole').value, u=document.getElementById('uid').value.trim(),p=document.getElementById('pwd').value;
  if(!u||!p)return warn("Sign-in required","Please enter your User ID and password.");
  if(mode==="test" || true){role=r;token="demo-token";sessionStorage.setItem("ulpin_role",role);updateRole();show(r==="admin"?"admin":"lookup")}
 }
+
 function updateRole(){document.getElementById('roleBadge').textContent=role==="admin"?"Administrator":"User";document.getElementById('logout').classList.remove('hidden')}
 function logout(){role=null;token=null;sessionStorage.clear();document.getElementById('roleBadge').textContent="Not signed in";document.getElementById('logout').classList.add('hidden');show('home')}
 function getVal(id){return document.getElementById(id)?.value?.trim()||""}
+
 function make3DULPIN(){
  const parent=getVal('parent'), z=getVal('floor'), spaceCode=({"Vertical / Building":"V","Common / Shared":"S","Underground":"U","Elevated / Air-right":"E"})[getVal('space')]||'V';
  const rights=getVal('rights')||'PRV', unit=getVal('unit')||'UNIT', version='V01';
@@ -102,16 +107,49 @@ function make3DULPIN(){
  if(!/^[A-Za-z0-9_-]{1,16}$/.test(unit)) throw Error('Unit ID may contain letters, numbers, _ or - only.');
  return `${parent}-${z.toUpperCase()}-${spaceCode}-${rights}-${unit.toUpperCase()}-${version}`;
 }
+
 function toggleUpdate(){document.getElementById('updateIdWrap').classList.toggle('hidden',getVal('op')!=='update')}
+
 function lookupProperty(){
- const id=getVal('searchId');if(!id)return warn('Missing 3D ULPIN','Enter a 3D ULPIN before searching.');
- if(mode==='test'){
-   const local=localStorage.getItem('test_property_'+id);
-   const d=local?JSON.parse(local):(mock[id]||mock['12345678901234-F03-V-PRV-A301-V01']);
-   return renderResult({...d,threeDULPIN:d.threeDULPIN||id},false);
+ const id = getVal('searchId').toUpperCase();
+ if(!id) return warn('Missing 3D ULPIN','Enter a 3D ULPIN before searching.');
+ 
+ // 1. Check local storage (records saved dynamically in Admin panel)
+ const local = localStorage.getItem('test_property_' + id);
+ if(local) {
+   return renderResult(JSON.parse(local), false);
  }
- fetch(window.APP_CONFIG.API_BASE+'/properties/'+encodeURIComponent(id),{headers:token?{Authorization:'Bearer '+token}:{}}).then(async r=>{if(!r.ok)throw Error();return r.json()}).then(d=>renderResult(d,false)).catch(()=>renderResult({threeDULPIN:id,parentULPIN:'—',name:'Property record received',space:'—',floor:'—',area:'—',address:'—',status:'Failed to load',validation:'Failed to load',rights:'Authorised details unavailable',version:'—'},true));
+ 
+ // 2. Check hardcoded mock definition
+ if(mock[id]) {
+   return renderResult(mock[id], false);
+ }
+
+ // 3. Fallback: Generate dynamic, valid-looking example for any unlisted ULPIN
+ const parts = id.split('-');
+ const parentId = (parts[0] && parts[0].length === 14) ? parts[0] : "00000000000000";
+ const floorLvl = parts[1] || "F01";
+ const unitId = parts[4] || "DEMO";
+ 
+ const dynamicMock = {
+   threeDULPIN: id,
+   parentULPIN: parentId,
+   name: `Simulated Demo Unit (${unitId})`,
+   space: "Vertical / Building",
+   floor: floorLvl,
+   area: "120.5",
+   address: "Example City, Demo State",
+   lat: 41.8781,
+   lon: -87.6298,
+   status: "Simulated Record",
+   validation: "PASS — Synthetic Fallback Data",
+   rights: parts[3] === "COM" ? "Common" : "Private",
+   version: parts[5] || "V01"
+ };
+ 
+ return renderResult(dynamicMock, false);
 }
+
 function renderResult(d,failed){
  const r=document.getElementById('result');r.classList.remove('hidden');
  r.innerHTML=`<div class="card half"><div class="sectionline"></div><h3>Property Details</h3><div class="kv"><div>3D ULPIN</div><div>${d.threeDULPIN||'—'}</div><div>Parent ULPIN</div><div>${d.parentULPIN||'—'}</div><div>Property</div><div>${d.name||'—'}</div><div>Space class</div><div>${d.space||'—'}</div><div>Floor / Z-level</div><div>${d.floor||'—'}</div><div>Area</div><div>${d.area||'—'} m²</div><div>Status</div><div>${d.status||'—'}</div><div>Validation</div><div>${d.validation||'—'}</div></div></div>
@@ -120,32 +158,57 @@ function renderResult(d,failed){
  <div class="card third"><div class="sectionline"></div><h3>3D Model</h3><div class="asset"><div><div class="icon">◇</div><strong class="${failed?'failed':''}">${failed?'Failed to load':'3D model available'}</strong><br><small>3D Tiles / model endpoint</small></div></div></div>
  <div class="card third"><div class="sectionline"></div><h3>Rights & Version</h3><div class="kv"><div>Rights</div><div>${d.rights||'—'}</div><div>Version</div><div>${d.version||'—'}</div></div></div>`;
 }
+
 function openMap(lat,lon){if(!lat&&!lon)return warn('Location unavailable','The backend did not return coordinates for this property.');window.open('https://www.google.com/maps?q='+lat+','+lon,'_blank')}
 function refreshAdmin(){const ok=role==='admin';document.getElementById('adminGate').classList.toggle('hidden',ok);document.getElementById('adminPanel').classList.toggle('hidden',!ok)}
+
 function saveProperty(){
  if(role!=='admin')return warn('Access denied','Administrator authentication is required.');
  let threeD;try{threeD=make3DULPIN()}catch(e){return warn('Invalid record',e.message)}
  const file=document.getElementById('blueprint').files[0];
  if(file && file.size>25*1024*1024)return warn('File too large','Blueprint files must be 25 MB or smaller.');
- const data={parentULPIN:getVal('parent'),threeDULPIN:threeD,name:getVal('pname'),space:getVal('space'),floor:getVal('floor'),rights:getVal('rights'),unitId:getVal('unit'),area:getVal('area'),address:getVal('addr'),blueprintName:file?.name||null};
+ 
+ const data={
+   parentULPIN:getVal('parent'),
+   threeDULPIN:threeD,
+   name:getVal('pname'),
+   space:getVal('space'),
+   floor:getVal('floor'),
+   rights:getVal('rights'),
+   unitId:getVal('unit'),
+   area:getVal('area'),
+   address:getVal('addr'),
+   blueprintName:file?.name||null
+ };
+ 
  if(!data.name)return warn('Incomplete record','Property / Unit Name is required.');
  document.getElementById('generatedId').textContent=threeD;
- if(mode==='test'){localStorage.setItem('test_property_'+threeD,JSON.stringify({...data,status:'Approved / Published',validation:'PASS — geometry valid',version:'V01',lat:25.3176,lon:82.9739}));warn('Test record saved','3D ULPIN generated successfully: '+threeD);return}
- const op=getVal('op');const endpoint=op==='update'?window.APP_CONFIG.API_BASE+'/properties/'+encodeURIComponent(getVal('updateId')):window.APP_CONFIG.API_BASE+'/properties';
- const method=op==='update'?'PUT':'POST';
- fetch(endpoint,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(data)}).then(async r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{if(d.threeDULPIN)document.getElementById('generatedId').textContent=d.threeDULPIN;warn('Record submitted','The backend accepted the property record. Generated 3D ULPIN: '+(d.threeDULPIN||threeD))}).catch(()=>warn('Failed to save','The backend could not be reached or rejected the request. No local database write was attempted.'))
+ 
+ // Save the user's new record locally so it can be searched
+ localStorage.setItem('test_property_'+threeD, JSON.stringify({
+   ...data,
+   status:'Approved / Published',
+   validation:'PASS — geometry valid',
+   version:'V01',
+   lat:41.8781,
+   lon:-87.6298
+ }));
+ 
+ warn('Test record saved', '3D ULPIN generated and saved locally: ' + threeD + '. You can now search for it in Property Search.');
 }
+
 function resetAdmin(){document.querySelectorAll('#adminPanel input,#adminPanel textarea').forEach(x=>x.value='');document.getElementById('generatedId').textContent='Will be generated after submission';toggleUpdate()}
 
 const translations={
  en:{'Home':'Home','Property Search':'Property Search','Administration':'Administration','About 3D ULPIN':'About 3D ULPIN','Sign out':'Sign out','Not signed in':'Not signed in','Search Property':'Search Property','Administrator Login':'Administrator Login','Secure Portal Login':'Secure Portal Login','Sign in':'Sign in','Cancel':'Cancel','User ID':'User ID','Password':'Password','Account type':'Account type','User / Citizen':'User / Citizen','Administrator':'Administrator','Citizen / User Services':'Citizen / User Services','Register / Update Property':'Register / Update Property','Create new record':'Create new record','Update existing record':'Update existing record','Parent 2D ULPIN':'Parent 2D ULPIN','Rights / Use Code':'Rights / Use Code','Unit ID':'Unit ID','Property / Unit Name':'Property / Unit Name','Space Class':'Space Class','Floor / Z-level':'Floor / Z-level','Area (m²)':'Area (m²)','Location / Address':'Location / Address','Blueprint / source document':'Blueprint / source document','Save / Submit':'Save / Submit','Reset':'Reset','Generated 3D ULPIN:':'Generated 3D ULPIN:','Search 3D Property Record':'Search 3D Property Record','Fetch Property':'Fetch Property','Clear':'Clear','Property Details':'Property Details','Location':'Location','Blueprint':'Blueprint','3D Model':'3D Model','Rights & Version':'Rights & Version','Get Location':'Get Location','Record Governance':'Record Governance'},
- hi:{'Home':'मुख्य पृष्ठ','Property Search':'संपत्ति खोज','Administration':'प्रशासन','About 3D ULPIN':'3D ULPIN के बारे बारे में','Sign out':'साइन आउट','Not signed in':'साइन इन नहीं है','Search Property':'संपत्ति खोजें','Administrator Login':'प्रशासक लॉगिन','Secure Portal Login':'सुरक्षित पोर्टल लॉगिन','Sign in':'साइन इन','Cancel':'रद्द करें','User ID':'उपयोगकर्ता आईडी','Password':'पासवर्ड','Account type':'खाता प्रकार','User / Citizen':'उपयोगकर्ता / नागरिक','Administrator':'प्रशासक','Citizen / User Services':'नागरिक / उपयोगकर्ता सेवाएँ','Register / Update Property':'संपत्ति पंजीकरण / अपडेट','Create new record':'नया रिकॉर्ड बनाएँ','Update existing record':'मौजूदा रिकॉर्ड अपडेट करें','Parent 2D ULPIN':'मूल 2D ULPIN','Rights / Use Code':'अधिकार / उपयोग कोड','Unit ID':'इकाई आईडी','Property / Unit Name':'संपत्ति / इकाई का नाम','Space Class':'स्थान वर्ग','Floor / Z-level':'मंज़िल / Z-स्तर','Area (m²)':'क्षेत्रफल (m²)','Location / Address':'स्थान / पता','Blueprint / source document':'ब्लूप्रिंट / स्रोत दस्तावेज़','Save / Submit':'सहेजें / जमा करें','Reset':'रीसेट','Generated 3D ULPIN:':'निर्मित 3D ULPIN:','Search 3D Property Record':'3D संपत्ति रिकॉर्ड खोजें','Fetch Property':'संपत्ति प्राप्त करें','Clear':'साफ़ करें','Property Details':'संपत्ति विवरण','Location':'स्थान','Blueprint':'ब्लूप्रिंट','3D Model':'3D मॉडल','Rights & Version':'अधिकार और संस्करण','Get Location':'स्थान प्राप्त करें','Record Governance':'रिकॉर्ड प्रशासन'},
+ hi:{'Home':'मुख्य पृष्ठ','Property Search':'संपत्ति खोज','Administration':'प्रशासन','About 3D ULPIN':'3D ULPIN के बारे में','Sign out':'साइन आउट','Not signed in':'साइन इन नहीं है','Search Property':'संपत्ति खोजें','Administrator Login':'प्रशासक लॉगिन','Secure Portal Login':'सुरक्षित पोर्टल लॉगिन','Sign in':'साइन इन','Cancel':'रद्द करें','User ID':'उपयोगकर्ता आईडी','Password':'पासवर्ड','Account type':'खाता प्रकार','User / Citizen':'उपयोगकर्ता / नागरिक','Administrator':'प्रशासक','Citizen / User Services':'नागरिक / उपयोगकर्ता सेवाएँ','Register / Update Property':'संपत्ति पंजीकरण / अपडेट','Create new record':'नया रिकॉर्ड बनाएँ','Update existing record':'मौजूदा रिकॉर्ड अपडेट करें','Parent 2D ULPIN':'मूल 2D ULPIN','Rights / Use Code':'अधिकार / उपयोग कोड','Unit ID':'इकाई आईडी','Property / Unit Name':'संपत्ति / इकाई का नाम','Space Class':'स्थान वर्ग','Floor / Z-level':'मंज़िल / Z-स्तर','Area (m²)':'क्षेत्रफल (m²)','Location / Address':'स्थान / पता','Blueprint / source document':'ब्लूप्रिंट / स्रोत दस्तावेज़','Save / Submit':'सहेजें / जमा करें','Reset':'रीसेट','Generated 3D ULPIN:':'निर्मित 3D ULPIN:','Search 3D Property Record':'3D संपत्ति रिकॉर्ड खोजें','Fetch Property':'संपत्ति प्राप्त करें','Clear':'साफ़ करें','Property Details':'संपत्ति विवरण','Location':'स्थान','Blueprint':'ब्लूप्रिंट','3D Model':'3D मॉडल','Rights & Version':'अधिकार और संस्करण','Get Location':'स्थान प्राप्त करें','Record Governance':'रिकॉर्ड प्रशासन'},
  te:{'Home':'హోమ్','Property Search':'ఆస్తి శోధన','Administration':'పరిపాలన','About 3D ULPIN':'3D ULPIN గురించి','Sign out':'సైన్ అవుట్','Not signed in':'సైన్ ఇన్ కాలేదు','Search Property':'ఆస్తిని శోధించండి','Administrator Login':'నిర్వాహక లాగిన్','Secure Portal Login':'సురక్షిత పోర్టల్ లాగిన్','Sign in':'సైన్ ఇన్','Cancel':'రద్దు','User ID':'వినియోగదారు ID','Password':'పాస్‌వర్డ్','Account type':'ఖాతా రకం','User / Citizen':'వినియోగదారు / పౌరుడు','Administrator':'నిర్వాహకుడు','Citizen / User Services':'పౌర / వినియోగదారు సేవలు','Register / Update Property':'ఆస్తి నమోదు / నవీకరణ','Create new record':'కొత్త రికార్డు సృష్టించండి','Update existing record':'ఉన్న రికార్డును నవీకరించండి','Parent 2D ULPIN':'మాతృ 2D ULPIN','Rights / Use Code':'హక్కులు / వినియోగ కోడ్','Unit ID':'యూనిట్ ID','Property / Unit Name':'ఆస్తి / యూనిట్ పేరు','Space Class':'స్థల వర్గం','Floor / Z-level':'అంతస్తు / Z-స్థాయి','Area (m²)':'విస్తీర్ణం (m²)','Location / Address':'స్థానం / చిరునామా','Blueprint / source document':'బ్లూప్రింట్ / మూల పత్రం','Save / Submit':'సేవ్ / సమర్పించండి','Reset':'రీసెట్','Generated 3D ULPIN:':'రూపొందించిన 3D ULPIN:','Search 3D Property Record':'3D ఆస్తి రికార్డు శోధన','Fetch Property':'ఆస్తి పొందండి','Clear':'క్లియర్','Property Details':'ఆస్తి వివరాలు','Location':'స్థానం','Blueprint':'బ్లూప్రింట్','3D Model':'3D మోడల్','Rights & Version':'హక్కులు & వెర్షన్','Get Location':'స్థానం పొందండి','Record Governance':'రికార్డు నిర్వహణ'},
  ta:{'Home':'முகப்பு','Property Search':'சொத்து தேடல்','Administration':'நிர்வாகம்','About 3D ULPIN':'3D ULPIN பற்றி','Sign out':'வெளியேறு','Not signed in':'உள்நுழையவில்லை','Search Property':'சொத்தை தேடு','Administrator Login':'நிர்வாகி உள்நுழைவு','Secure Portal Login':'பாதுகாப்பான உள்நுழைவு','Sign in':'உள்நுழை','Cancel':'ரத்து','User ID':'பயனர் ID','Password':'கடவுச்சொல்','Account type':'கணக்கு வகை','User / Citizen':'பயனர் / குடிமகன்','Administrator':'நிர்வாகி','Citizen / User Services':'குடிமகன் / பயனர் சேவைகள்','Register / Update Property':'சொத்து பதிவு / புதுப்பிப்பு','Create new record':'புதிய பதிவு உருவாக்கு','Update existing record':'ஏற்கனவே உள்ள பதிவை புதுப்பி','Parent 2D ULPIN':'மூல 2D ULPIN','Rights / Use Code':'உரிமை / பயன்பாட்டு குறியீடு','Unit ID':'அலகு ID','Property / Unit Name':'சொத்து / அலகு பெயர்','Space Class':'இட வகை','Floor / Z-level':'தளம் / Z-நிலை','Area (m²)':'பரப்பளவு (m²)','Location / Address':'இடம் / முகவரி','Blueprint / source document':'வரைபடம் / மூல ஆவணம்','Save / Submit':'சேமி / சமர்ப்பி','Reset':'மீட்டமை','Generated 3D ULPIN:':'உருவாக்கப்பட்ட 3D ULPIN:','Search 3D Property Record':'3D சொத்து பதிவை தேடு','Fetch Property':'சொத்தை பெறு','Clear':'அழி','Property Details':'சொத்து விவரங்கள்','Location':'இடம்','Blueprint':'வரைபடம்','3D Model':'3D மாதிரி','Rights & Version':'உரிமைகள் & பதிப்பு','Get Location':'இடத்தை பெறு','Record Governance':'பதிவு நிர்வாகம்'},
  bn:{'Home':'হোম','Property Search':'সম্পত্তি অনুসন্ধান','Administration':'প্রশাসন','About 3D ULPIN':'3D ULPIN সম্পর্কে','Sign out':'সাইন আউট','Search Property':'সম্পত্তি খুঁজুন','Administrator Login':'প্রশাসক লগইন','Sign in':'সাইন ইন','Cancel':'বাতিল','User ID':'ব্যবহারকারী আইডি','Password':'পাসওয়ার্ড','Account type':'অ্যাকাউন্টের ধরন','User / Citizen':'ব্যবহারকারী / নাগরিক','Administrator':'প্রশাসক','Register / Update Property':'সম্পত্তি নিবন্ধন / আপডেট','Create new record':'নতুন রেকর্ড তৈরি করুন','Update existing record':'বিদ্যমান রেকর্ড আপডেট করুন','Parent 2D ULPIN':'মূল 2D ULPIN','Rights / Use Code':'অধিকার / ব্যবহার কোড','Unit ID':'ইউনিট ID','Property / Unit Name':'সম্পত্তি / ইউনিটের নাম','Space Class':'স্থান শ্রেণি','Floor / Z-level':'তলা / Z-স্তর','Area (m²)':'এলাকা (m²)','Location / Address':'অবস্থান / ঠিকানা','Blueprint / source document':'ব্লুপ্রিন্ট / উৎস নথি','Save / Submit':'সংরক্ষণ / জমা','Reset':'রিসেট','Generated 3D ULPIN:':'তৈরি 3D ULPIN:','Search 3D Property Record':'3D সম্পত্তি রেকর্ড খুঁজুন','Fetch Property':'সম্পত্তি আনুন','Clear':'পরিষ্কার','Property Details':'সম্পত্তির বিবরণ','Location':'অবস্থান','Blueprint':'ব্লুপ্রিন্ট','3D Model':'3D মডেল','Rights & Version':'অধিকার ও সংস্করণ','Get Location':'অবস্থান পান','Record Governance':'রেকর্ড পরিচালনা'}
 };
 ['as','brx','doi','gu','kn','ks','kok','mai','ml','mni','mr','ne','or','pa','sa','sat','sd','ur'].forEach(c=>translations[c]=translations.en);
 translations.mr={...translations.hi};
+
 function applyLanguage(code){
  localStorage.setItem('ulpin_lang',code);document.documentElement.lang=code;document.documentElement.dir=code==='ur'?'rtl':'ltr';
  const tr=translations[code]||translations.en;
