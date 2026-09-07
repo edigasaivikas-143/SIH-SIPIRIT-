@@ -4,6 +4,31 @@ from pathlib import Path
 
 st.set_page_config(layout="wide")
 
+# Hide Streamlit's default chrome and padding to make the iframe full-screen
+st.markdown("""
+    <style>
+        /* Hide the top header bar */
+        header {visibility: hidden;}
+        /* Hide the bottom footer */
+        footer {visibility: hidden;}
+        /* Remove padding from the main block */
+        .block-container {
+            padding-top: 0rem;
+            padding-bottom: 0rem;
+            padding-left: 0rem;
+            padding-right: 0rem;
+            max-width: 100%;
+        }
+        /* Remove padding from the component wrapper */
+        iframe {
+            display: block;
+            border: none;
+            height: 100vh !important;
+            width: 100vw !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Get the directory of this python file
 base_dir = Path(__file__).parent
 
